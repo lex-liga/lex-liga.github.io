@@ -79,9 +79,7 @@
   <script src="js/supabase-config.js"></script>
   <script src="js/announce.js"></script>
   <script>
-    // Photos from this site's assets/gallery folder
-    var REPO = 'lex-liga/lex-liga.github.io';
-    var API = 'https://api.github.com/repos/' + REPO + '/contents/assets/gallery';
+    var BUCKET = 'gallery';
 
     function openLb(src) {
       document.getElementById('lightboxImg').src = src;
@@ -91,25 +89,38 @@
       document.getElementById('lightbox').classList.remove('open');
     }
 
+    function publicUrl(path) {
+      var sb = window.supabaseClient;
+      if (!sb || !sb.storage) return '';
+      var r = sb.storage.from(BUCKET).getPublicUrl(path);
+      return (r && r.data && r.data.publicUrl) || '';
+    }
+
     async function loadGallery() {
       var el = document.getElementById('gallery');
+      var sb = window.supabaseClient;
+      if (!sb || !sb.storage) {
+        el.innerHTML = '<p class="text-slate-400 text-sm">Photos will appear here during the event.</p>';
+        return;
+      }
       try {
-        var res = await fetch(API + '?ref=main');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        var files = await res.json();
-        if (!Array.isArray(files)) throw new Error('Unexpected response');
-        var imgs = files.filter(function (f) {
-          return f.type === 'file' && /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+        var res = await sb.storage.from(BUCKET).list('', {
+          limit: 200,
+          sortBy: { column: 'created_at', order: 'desc' }
         });
-        if (!imgs.length) {
+        if (res.error) throw res.error;
+        var files = (res.data || []).filter(function (f) {
+          return f.name && /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+        });
+        if (!files.length) {
           el.innerHTML = '<p class="text-slate-400 text-sm">Photos will appear here during the event.</p>';
           return;
         }
-        imgs.sort(function (a, b) { return b.name.localeCompare(a.name); });
-        el.innerHTML = imgs.map(function (f) {
-          var url = f.download_url;
-          return '<div class="gallery-item" onclick="openLb(\'' + url + '\')">' +
-            '<img src="' + url + '" alt="' + f.name.replace(/"/g, '') + '" loading="lazy" />' +
+        el.innerHTML = files.map(function (f) {
+          var url = publicUrl(f.name);
+          var safe = String(f.name).replace(/"/g, '');
+          return '<div class="gallery-item" onclick="openLb(\'' + url.replace(/'/g, "%27") + '\')">' +
+            '<img src="' + url + '" alt="' + safe + '" loading="lazy" />' +
             '</div>';
         }).join('');
       } catch (e) {
@@ -118,7 +129,7 @@
       }
     }
     loadGallery();
-    setInterval(loadGallery, 60000);
+    setInterval(loadGallery, 30000);
   </script>
 </body>
 </html>
