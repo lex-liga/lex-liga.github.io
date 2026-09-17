@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/extras.css" />
   <link rel="manifest" href="manifest.json" />
   <style>
     .gallery-grid {
@@ -49,23 +50,12 @@
   </style>
 </head>
 <body class="min-h-screen">
-  <header class="site-header sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-      <a href="index.html" class="site-wordmark">LEX <span>LIGA</span></a>
-      <nav class="site-nav">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="futsal.html" class="nav-link">Futsal</a>
-        <a href="badminton.html" class="nav-link">Badminton</a>
-        <a href="gallery.html" class="nav-link" style="color:#4ade80">Photos</a>
-        <a href="bracket.html" class="nav-link">Bracket</a>
-      </nav>
-    </div>
-  </header>
+  <header class="site-header sticky top-0 z-50"></header>
 
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
     <p class="section-eyebrow">MATCHDAY MOMENTS</p>
     <h1 class="text-2xl font-extrabold mb-2">Photo Wall</h1>
-    <p class="text-slate-400 text-sm mb-8">Uploads from the <code class="text-green-400">assets/gallery</code> folder appear here automatically.</p>
+    <p class="text-slate-400 text-sm mb-8">Moments from Lex Liga — refreshed as new photos are added.</p>
     <div id="gallery" class="gallery-grid">
       <p class="text-slate-400 text-sm">Loading photos…</p>
     </div>
@@ -76,11 +66,21 @@
     <img id="lightboxImg" src="" alt="" />
   </div>
 
+  <footer class="site-footer">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div class="footer-content">
+        <div class="footer-credit-block"><span class="footer-label">Created by</span><strong class="footer-name">Jatin Narula</strong></div>
+        <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports & Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
+      </div>
+    </div>
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/announce.js"></script>
   <script>
-    var REPO = 'jatinbscllb1232802-create/lex-liga';
+    // Photos from this site's assets/gallery folder
+    var REPO = 'lex-liga/lex-liga.github.io';
     var API = 'https://api.github.com/repos/' + REPO + '/contents/assets/gallery';
 
     function openLb(src) {
@@ -102,10 +102,9 @@
           return f.type === 'file' && /\.(jpe?g|png|gif|webp)$/i.test(f.name);
         });
         if (!imgs.length) {
-          el.innerHTML = '<p class="text-slate-400 text-sm">No photos yet. Add images to <strong>assets/gallery/</strong> on GitHub.</p>';
+          el.innerHTML = '<p class="text-slate-400 text-sm">Photos will appear here during the event.</p>';
           return;
         }
-        // newest first by name if timestamped, else as listed
         imgs.sort(function (a, b) { return b.name.localeCompare(a.name); });
         el.innerHTML = imgs.map(function (f) {
           var url = f.download_url;
@@ -115,7 +114,7 @@
         }).join('');
       } catch (e) {
         console.error(e);
-        el.innerHTML = '<p class="text-red-400 text-sm">Could not load gallery. Create folder <code>assets/gallery</code> and upload photos.</p>';
+        el.innerHTML = '<p class="text-slate-400 text-sm">Photos will appear here during the event.</p>';
       }
     }
     loadGallery();
