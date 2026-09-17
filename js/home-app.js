@@ -24,7 +24,7 @@ async function loadHome() {
     teams = teamsRes.data || [];
     futsalAll = matchesRes.data || [];
     bmAll = bmRes.data || [];
-    futsalLive = futsalAll.filter(m => m.status === 'live' || m.status === 'half_time');
+    futsalLive = futsalAll.filter(m => m.status === 'live' || m.status === 'half_time' || m.status === 'penalties');
     bmLive = bmAll.filter(m => m.status === 'live');
   } catch (err) {
     console.error(err);
@@ -41,7 +41,6 @@ async function loadHome() {
       : '<p class="empty-state">No live matches right now. Check back during match times.</p>';
   }
 
-  // Sound + notifications
   if (typeof window.lexWatchScores === 'function') {
     const watch = [];
     futsalLive.forEach(m => {
@@ -50,7 +49,7 @@ async function loadHome() {
       watch.push({
         id: 'f-' + m.id,
         label: 'Futsal live: ' + home + ' vs ' + away,
-        scoreKey: String(m.home_score) + '-' + String(m.away_score),
+        scoreKey: String(m.home_score) + '-' + String(m.away_score) + '-p' + String(m.pen_home || 0) + '-' + String(m.pen_away || 0),
         isLive: true
       });
     });
@@ -89,22 +88,25 @@ function teamName(teams, id) {
 function renderFutsalLive(m, teams) {
   const home = teamName(teams, m.home_team_id);
   const away = teamName(teams, m.away_team_id);
+  const pens = (m.pens_on || m.status === 'penalties' || m.pen_home || m.pen_away)
+    ? ` · Pens ${(m.pen_home ?? 0)}–${(m.pen_away ?? 0)}`
+    : '';
+  const label = m.status === 'penalties' ? '⚽ Futsal · PENS' : '⚽ Futsal · LIVE';
   return `
     <a href="futsal.html" class="home-live-card home-live-futsal">
-      <div class="home-live-sport">⚽ Futsal · LIVE</div>
+      <div class="home-live-sport">${label}</div>
       <div class="home-live-scoreline">
         <span class="home-live-team">${home}</span>
         <span class="home-live-score">${m.home_score ?? 0} – ${m.away_score ?? 0}</span>
         <span class="home-live-team">${away}</span>
       </div>
-      <div class="home-live-meta">${m.group_name || 'Match'} · Open Futsal →</div>
+      <div class="home-live-meta">${m.group_name || 'Match'}${pens} · Open Futsal →</div>
     </a>`;
 }
 
 function renderBmLive(m) {
-  const cg = m.current_game || 1;
-  const p1 = m['g' + cg + '_p1'] ?? 0;
-  const p2 = m['g' + cg + '_p2'] ?? 0;
+  const p1 = Number(m.g1_p1) || 0;
+  const p2 = Number(m.g1_p2) || 0;
   return `
     <a href="badminton.html" class="home-live-card home-live-badminton">
       <div class="home-live-sport">🏸 Badminton · LIVE</div>
@@ -113,7 +115,7 @@ function renderBmLive(m) {
         <span class="home-live-score">${p1} – ${p2}</span>
         <span class="home-live-team">${m.player2}</span>
       </div>
-      <div class="home-live-meta">${m.category || 'Match'} · Games ${m.games_p1 || 0}–${m.games_p2 || 0} · Open Badminton →</div>
+      <div class="home-live-meta">${m.category || 'Match'} · Open Badminton →</div>
     </a>`;
 }
 
