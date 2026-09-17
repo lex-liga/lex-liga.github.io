@@ -66,7 +66,7 @@
         setTimeout(loadAnnounceAdmin, 100);
       } else if (sport === 'photos') {
         document.getElementById('adminPanelPhotos').classList.remove('hidden');
-        setTimeout(loadPhotosAdmin, 100);
+        setTimeout(function(){ if (window.loadPhotosAdmin) window.loadPhotosAdmin(); else loadPhotosAdmin(); }, 100);
       } else {
         document.getElementById('adminPanelFutsal').classList.remove('hidden');
         setTimeout(function(){
@@ -134,7 +134,7 @@
         '</div></div>';
     }
     function escapeHtml(s) {
-      return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
     async function publishAnnounce() {
       var sb = window.supabaseClient;
@@ -179,7 +179,6 @@
       loadAnnounceAdmin();
     }
 
-    /* ===== Photos (Supabase Storage) ===== */
     var GALLERY_BUCKET = 'gallery';
 
     function photoPublicUrl(name) {
@@ -189,6 +188,7 @@
     }
 
     async function loadPhotosAdmin() {
+      window.loadPhotosAdmin = loadPhotosAdmin;
       var list = document.getElementById('photoList');
       var sb = window.supabaseClient;
       if (!sb || !sb.storage) {
@@ -223,40 +223,10 @@
     }
 
     async function uploadPhotos() {
-      var input = document.getElementById('photoFiles');
-      var st = document.getElementById('photoStatus');
-      var sb = window.supabaseClient;
-      var files = input.files;
-      if (!files || !files.length) {
-        st.textContent = 'Choose one or more images first';
-        st.className = 'text-sm text-center text-red-400';
-        return;
+      if (window.lexCompressAndUploadPhotos) {
+        return window.lexCompressAndUploadPhotos();
       }
-      st.textContent = 'Uploading ' + files.length + ' file(s)…';
-      st.className = 'text-sm text-center text-slate-400';
-      var ok = 0, fail = 0;
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        if (!/^image\//.test(file.type)) { fail++; continue; }
-        var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-        if (['jpeg','jpg','png','webp','gif'].indexOf(ext) < 0) ext = 'jpg';
-        var name = Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-        var up = await sb.storage.from(GALLERY_BUCKET).upload(name, file, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: file.type || 'image/jpeg'
-        });
-        if (up.error) {
-          console.error(up.error);
-          fail++;
-        } else {
-          ok++;
-        }
-      }
-      input.value = '';
-      st.textContent = ok + ' uploaded' + (fail ? ', ' + fail + ' failed' : '') + '. Photo Wall updates automatically.';
-      st.className = 'text-sm text-center ' + (fail ? 'text-amber-400' : 'text-green-400');
-      loadPhotosAdmin();
+      alert('Compress script not loaded. Refresh the page.');
     }
 
     async function deletePhoto(name) {
@@ -385,8 +355,8 @@
     </header>
     <main class="max-w-lg mx-auto px-4 py-5 space-y-5 pb-20">
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-3">
-        <label class="text-xs text-slate-400 block">Select images (JPG / PNG / WebP, max 5 MB each)</label>
-        <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple
+        <label class="text-xs text-slate-400 block">Select images (iPhone OK — auto-compressed to JPEG)</label>
+        <input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" multiple
           class="w-full text-sm text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-green-500 file:text-slate-900 file:font-bold" />
         <button type="button" onclick="uploadPhotos()" class="w-full bg-green-500 text-slate-900 font-bold py-3 rounded-xl">Upload</button>
         <p id="photoStatus" class="text-sm text-center text-slate-400"></p>
@@ -402,6 +372,7 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
+  <script src="js/admin-photos.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/admin-badminton.js"></script>
   <script src="js/admin-announce-fix.js"></script>
