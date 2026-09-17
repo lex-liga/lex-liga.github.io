@@ -159,46 +159,9 @@ body.has-announce .site-header {
   background: rgba(22, 101, 52, 0.35);
 }
 
-/* PWA install banner */
+/* Old bottom banner (unused; kept harmless) */
 .pwa-install-banner {
-  position: fixed;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 70;
-  display: none;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-radius: 1rem;
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-}
-.pwa-install-banner.show { display: flex; }
-.pwa-install-banner p {
-  flex: 1;
-  font-size: 0.8rem;
-  color: #e2e8f0;
-  margin: 0;
-  line-height: 1.35;
-}
-.pwa-install-banner button {
-  border: none;
-  border-radius: 0.65rem;
-  padding: 0.55rem 0.85rem;
-  font-weight: 800;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-.pwa-install-yes {
-  background: #22c55e;
-  color: #0f172a;
-}
-.pwa-install-no {
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  display: none !important;
 }
 
 .share-button {
@@ -279,7 +242,7 @@ body.has-announce .site-header {
   color: #64748b;
 }
 
-/* ===== Sport watermark – behind content only (like FOLLOW) ===== */
+/* ===== Sport watermark ===== */
 .sport-wm {
   position: fixed;
   inset: 0;
@@ -305,7 +268,6 @@ body.has-announce .site-header {
   line-height: 1;
   white-space: nowrap;
   text-transform: uppercase;
-  /* Soft fill – readable content sits on top */
   color: rgba(148, 163, 184, 0.09);
   background: none;
   -webkit-text-fill-color: rgba(148, 163, 184, 0.09);
@@ -327,14 +289,87 @@ body.has-announce .site-header {
   transform: translateX(14%);
 }
 
-/*
- * Do NOT force position:relative on sticky/fixed UI
- * (that broke header, footer, sound/alert buttons).
- * Only lift main page sections above the watermark.
- */
 body.has-sport-wm .hero-shell,
 body.has-sport-wm main,
 body.has-sport-wm .site-footer {
   position: relative;
   z-index: 1;
+}
+
+/* ===== Centered PWA install prompt ===== */
+.pwa-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+}
+.pwa-prompt-card {
+  position: relative;
+  width: min(100%, 380px);
+  padding: 1.75rem 1.5rem 1.35rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(160deg, #0f172a, #1e293b);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+.pwa-prompt-x {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pwa-prompt-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+.pwa-prompt-card h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 0.5rem;
+}
+.pwa-prompt-body {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0 0 1.25rem;
+}
+.pwa-prompt-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pwa-prompt-primary {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  font-weight: 800;
+  font-size: 0.875rem;
+  background: #22c55e;
+  color: #0f172a;
+  cursor: pointer;
+}
+.pwa-prompt-secondary {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
 }
