@@ -1,8 +1,56 @@
-/* Lex Liga — compress images before Supabase gallery upload */
+/* Lex Liga — HEIC convert + JPEG compress before Supabase upload */
 (function () {
   var BUCKET = 'gallery';
   var MAX_EDGE = 1600;
   var JPEG_Q = 0.78;
+  var heic2anyPromise = null;
+
+  function isHeic(file) {
+    var t = (file.type || '').toLowerCase();
+    var n = (file.name || '').toLowerCase();
+    return (
+      t === 'image/heic' ||
+      t === 'image/heif' ||
+      n.endsWith('.heic') ||
+      n.endsWith('.heif')
+    );
+  }
+
+  function loadHeic2Any() {
+    if (typeof window.heic2any === 'function') {
+      return Promise.resolve(window.heic2any);
+    }
+    if (heic2anyPromise) return heic2anyPromise;
+    heic2anyPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+      s.onload = function () {
+        if (typeof window.heic2any === 'function') resolve(window.heic2any);
+        else reject(new Error('heic2any failed to load'));
+      };
+      s.onerror = function () {
+        reject(new Error('Could not load HEIC converter'));
+      };
+      document.head.appendChild(s);
+    });
+    return heic2anyPromise;
+  }
+
+  function heicToJpegFile(file) {
+    return loadHeic2Any().then(function (heic2any) {
+      return heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.9
+      });
+    }).then(function (result) {
+      var blob = Array.isArray(result) ? result[0] : result;
+      if (!blob) throw new Error('HEIC conversion returned empty');
+      return new File([blob], (file.name || 'photo').replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg'), {
+        type: 'image/jpeg'
+      });
+    });
+  }
 
   function loadImageFromFile(file) {
     return new Promise(function (resolve, reject) {
@@ -15,9 +63,11 @@
       img.onerror = function () {
         URL.revokeObjectURL(url);
         if (typeof createImageBitmap === 'function') {
-          createImageBitmap(file).then(resolve).catch(function () {
-            reject(new Error('Could not read image'));
-          });
+          createImageBitmap(file)
+            .then(resolve)
+            .catch(function () {
+              reject(new Error('Could not read image'));
+            });
         } else {
           reject(new Error('Could not read image'));
         }
@@ -71,6 +121,18 @@
     });
   }
 
+  async function fileToUploadBlob(file) {
+    var source = file;
+    if (isHeic(file)) {
+      source = await heicToJpegFile(file);
+    }
+    var blob = await compressToJpeg(source, JPEG_Q);
+    if (blob.size > 4.5 * 1024 * 1024) {
+      blob = await compressToJpeg(source, 0.55);
+    }
+    return blob;
+  }
+
   window.lexCompressAndUploadPhotos = async function () {
     var input = document.getElementById('photoFiles');
     var st = document.getElementById('photoStatus');
@@ -92,6 +154,7 @@
 
     var ok = 0;
     var fail = 0;
+    var lastErr = '';
 
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
@@ -100,19 +163,23 @@
         /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || '');
       if (!isImage) {
         fail++;
+        lastErr = 'Not an image file';
         continue;
       }
 
-      st.textContent = 'Processing ' + (i + 1) + ' / ' + files.length + '…';
+      st.textContent =
+        (isHeic(file) ? 'Converting HEIC… ' : 'Processing… ') +
+        (i + 1) +
+        ' / ' +
+        files.length;
 
       var blob = null;
       try {
-        blob = await compressToJpeg(file, JPEG_Q);
-        if (blob.size > 4.5 * 1024 * 1024) {
-          blob = await compressToJpeg(file, 0.55);
-        }
+        blob = await fileToUploadBlob(file);
       } catch (e) {
-        console.warn('Compress failed', e);
+        console.warn('Process failed', e);
+        lastErr = (e && e.message) || 'Could not convert image';
+        // Last chance: plain web image under 5MB
         if (/^image\/(jpeg|png|webp|gif)$/i.test(file.type) && file.size <= 5 * 1024 * 1024) {
           blob = file;
         } else {
@@ -137,6 +204,7 @@
 
       if (up.error) {
         console.error(up.error);
+        lastErr = up.error.message || 'Upload rejected';
         fail++;
       } else {
         ok++;
@@ -144,12 +212,15 @@
     }
 
     if (input) input.value = '';
-    st.textContent =
+    var msg =
       ok +
       ' uploaded' +
       (fail ? ', ' + fail + ' failed' : '') +
-      '. Saved as compressed JPEG.';
-    st.className = 'text-sm text-center ' + (fail ? 'text-amber-400' : 'text-green-400');
+      '.';
+    if (ok) msg += ' Saved as compressed JPEG.';
+    if (fail && lastErr) msg += ' (' + lastErr + ')';
+    st.textContent = msg;
+    st.className = 'text-sm text-center ' + (fail && !ok ? 'text-red-400' : fail ? 'text-amber-400' : 'text-green-400');
 
     if (typeof window.loadPhotosAdmin === 'function') {
       window.loadPhotosAdmin();
