@@ -1,5 +1,5 @@
 /* Load existing tournament theme, then dark-only overrides */
-@import url("https://cdn.jsdelivr.net/gh/jatinbscllb1232802-create/lex-liga@bbd355757705861f9bd4b519dfe41557cd3529af/css/styles.css");
+@import url("https://cdn.jsdelivr.net/gh/lex-liga/lex-liga@bbd355757705861f9bd4b519dfe41557cd3529af/css/styles.css");
 
 /* Dark only + hide footer bottom line + hide theme toggle */
 .theme-toggle,
