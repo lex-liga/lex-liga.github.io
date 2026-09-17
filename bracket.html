@@ -33,7 +33,7 @@
     <div>
       <p class="section-eyebrow">KNOCKOUT</p>
       <h1 class="text-2xl font-extrabold">Tournament Bracket</h1>
-      <p class="text-slate-400 text-sm mt-1">Demo data shown until real QF / SF / Final matches are added in admin.</p>
+      <p class="text-slate-400 text-sm mt-1">Quarter-finals · Semi-finals · Final</p>
     </div>
 
     <section>
@@ -93,7 +93,7 @@
           list.map(function (m) { return card(renderOne(m), m.status); }).join('') +
           '</div>';
       }).join('');
-      el.innerHTML = html || '<p class="text-slate-400 text-sm">No knockout matches yet.</p>';
+      el.innerHTML = html || '<p class="text-slate-400 text-sm">Knockout matches will appear here once the stage begins.</p>';
     }
 
     var DEMO_FUTSAL = [
@@ -160,7 +160,7 @@
         });
       } else {
         renderRounds('bracketFutsal', DEMO_FUTSAL, function (m) {
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + ' · demo</div>' +
+          return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + '</div>' +
             '<div class="font-semibold text-sm">' + m.home + ' <span class="text-slate-400">' + m.home_score + '</span></div>' +
             '<div class="font-semibold text-sm">' + m.away + ' <span class="text-slate-400">' + m.away_score + '</span></div>';
         });
@@ -174,7 +174,7 @@
         });
       } else {
         renderRounds('bracketBm', DEMO_BM, function (m) {
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.category || '') + ' · demo</div>' +
+          return '<div class="text-xs text-slate-500 mb-1">' + (m.category || '') + '</div>' +
             '<div class="font-semibold text-sm">' + m.player1 + ' <span class="text-slate-400">' + m.games_p1 + '</span></div>' +
             '<div class="font-semibold text-sm">' + m.player2 + ' <span class="text-slate-400">' + m.games_p2 + '</span></div>';
         });
