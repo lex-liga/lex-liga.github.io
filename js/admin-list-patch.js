@@ -68,6 +68,31 @@
       '<div class="text-[11px] text-green-400 text-center mt-1">Open controls</div></button>';
   }
 
+  function groupLabel(g) {
+    var t = (g || '').trim();
+    if (!t) return 'Uncategorized';
+    var u = t.toUpperCase();
+    if (u.indexOf('FINAL') >= 0 && u.indexOf('SEMI') < 0 && u.indexOf('QF') < 0) return 'Final';
+    if (u.indexOf('SF') >= 0 || u.indexOf('SEMI') >= 0) return 'Semi-finals';
+    if (u.indexOf('QF') >= 0 || u.indexOf('QUARTER') >= 0) return 'Quarter-finals';
+    if (u.indexOf('FIXTURE') >= 0 || u.indexOf('GROUP') >= 0) return t;
+    return t;
+  }
+
+  function groupOrder(label) {
+    var order = ['Fixtures', 'Group A', 'Group B', 'Group C', 'Group D', 'Quarter-finals', 'Semi-finals', 'Final'];
+    var i = order.indexOf(label);
+    if (i >= 0) return i;
+    if (label.toUpperCase().indexOf('GROUP') >= 0) return 5;
+    return 20;
+  }
+
+  function statusOrder(s) {
+    if (s === 'live' || s === 'half_time' || s === 'penalties') return 0;
+    if (s === 'not_started') return 1;
+    return 2;
+  }
+
   window.loadAdminData = async function () {
     var container = document.getElementById('adminMatches');
     if (!container) return;
@@ -123,30 +148,40 @@
         container.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">No matches yet.<br>Add one below.</p>';
         return;
       }
-      var live = cachedMatches.filter(function (m) {
-        return m.status === 'live' || m.status === 'half_time' || m.status === 'penalties';
+
+      // Group by group_name / stage
+      var byGroup = {};
+      cachedMatches.forEach(function (m) {
+        var lab = groupLabel(m.group_name);
+        if (!byGroup[lab]) byGroup[lab] = [];
+        byGroup[lab].push(m);
       });
-      var up = cachedMatches.filter(function (m) { return m.status === 'not_started'; });
-      var done = cachedMatches.filter(function (m) {
-        return m.status === 'finished' || m.status === 'walkover';
+      var groups = Object.keys(byGroup).sort(function (a, b) { return groupOrder(a) - groupOrder(b); });
+
+      var html = '';
+      groups.forEach(function (lab) {
+        var list = byGroup[lab].slice().sort(function (a, b) {
+          return statusOrder(a.status) - statusOrder(b.status);
+        });
+        var liveN = list.filter(function (m) {
+          return m.status === 'live' || m.status === 'half_time' || m.status === 'penalties';
+        }).length;
+        var upN = list.filter(function (m) { return m.status === 'not_started'; }).length;
+        html += '<div class="mt-5 first:mt-0">' +
+          '<div class="flex items-center justify-between mb-2">' +
+          '<p class="text-sm font-extrabold text-green-400">' + lab + '</p>' +
+          '<span class="text-[11px] text-slate-500">' + list.length + ' · ' +
+          (liveN ? liveN + ' live · ' : '') + upN + ' up</span></div>' +
+          '<div class="space-y-2">' + list.map(renderListRow).join('') + '</div></div>';
       });
-      function section(title, list) {
-        if (!list.length) return '';
-        return '<p class="text-xs font-bold text-slate-500 uppercase mb-2 mt-4">' + title + '</p>' +
-          '<div class="space-y-2">' + list.map(renderListRow).join('') + '</div>';
-      }
-      container.innerHTML =
-        section('Live / Pens', live) +
-        section('Upcoming', up) +
-        section('Finished', done) +
-        '<p class="text-xs text-slate-500 text-center pt-2">Tap a match to control scores</p>';
+      html += '<p class="text-xs text-slate-500 text-center pt-3">Tap a match to control scores</p>';
+      container.innerHTML = html;
     } catch (err) {
       console.error(err);
       container.innerHTML = '<p class="text-red-400 text-sm text-center">Error: ' + (err.message || err) + '</p>';
     }
   };
 
-  // If futsal panel already open, refresh list UI
   setTimeout(function () {
     if (!document.getElementById('adminPanelFutsal') || document.getElementById('adminPanelFutsal').classList.contains('hidden')) return;
     if (typeof window.loadAdminData === 'function') window.loadAdminData();
