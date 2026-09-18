@@ -16,6 +16,14 @@ function bmStatusChip(status) {
 }
 function setBmAddVisible(show) {
   var box = document.getElementById('bmAddBox');
+  if (!box) {
+    var panel = document.getElementById('adminPanelBadminton');
+    if (panel) {
+      panel.querySelectorAll('.bg-slate-800').forEach(function (c) {
+        if (c.querySelector('#bmP1')) box = c;
+      });
+    }
+  }
   if (box) box.classList.toggle('hidden', !show);
   var title = document.getElementById('bmListTitle');
   if (title) title.textContent = selectedBmId ? 'Control match' : 'Matches';
@@ -58,7 +66,7 @@ function renderBmUI() {
     setBmAddVisible(false);
     el.innerHTML = '<button type="button" onclick="showBmList()" class="flex items-center gap-2 text-sm text-green-400 font-semibold mb-4">' +
       '<span class="text-lg">&larr;</span> Back to matches</button>' +
-      (typeof renderBmDetail === 'function' ? renderBmDetail(m) : '<p class="text-red-400">Detail script missing</p>');
+      (typeof renderBmDetail === 'function' ? renderBmDetail(m) : '<p class="text-red-400">Loading controls...</p>');
     return;
   }
   setBmAddVisible(true);
@@ -88,3 +96,13 @@ function renderBmRow(m) {
     '<span class="flex-1 text-sm font-semibold truncate">' + (m.player2 || '') + '</span></div>' +
     '<div class="text-[11px] text-green-400 text-center mt-1">Open controls</div></button>';
 }
+(function loadBmExtras() {
+  function add(src) {
+    if (document.querySelector('script[src="' + src + '"]')) return;
+    var s = document.createElement('script');
+    s.src = src + '?v=1';
+    document.body.appendChild(s);
+  }
+  add('js/admin-bm-detail.js');
+  add('js/admin-bm-actions.js');
+})();
