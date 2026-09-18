@@ -4,6 +4,7 @@
     { href: 'index.html', label: 'Home', id: 'home' },
     { href: 'futsal.html', label: '⚽ Futsal', id: 'futsal', sport: true },
     { href: 'badminton.html', label: '🏸 Badminton', id: 'badminton', sport: true },
+    { href: 'teams.html', label: 'Teams', id: 'teams' },
     { href: 'bracket.html', label: 'Bracket', id: 'bracket' },
     { href: 'gallery.html', label: 'Photos', id: 'gallery' },
     { href: 'fixtures.html', label: 'Fixtures', id: 'fixtures' }
@@ -33,6 +34,7 @@
       '<a href="badminton.html" class="sport-tab' + (cur === 'badminton.html' ? ' is-active' : '') + '"' +
       (cur === 'badminton.html' ? ' aria-current="page"' : '') + '><span>🏸</span> Badminton</a>' +
       '</div>' +
+      '<a href="teams.html" class="nav-link' + (cur === 'teams.html' ? ' is-active' : '') + '">Teams</a>' +
       '<a href="bracket.html" class="nav-link' + (cur === 'bracket.html' ? ' is-active' : '') + '">Bracket</a>' +
       '<a href="gallery.html" class="nav-link' + (cur === 'gallery.html' ? ' is-active' : '') + '">Photos</a>' +
       '<a href="fixtures.html" class="nav-link' + (cur === 'fixtures.html' ? ' is-active' : '') + '">Fixtures</a>' +
@@ -76,7 +78,6 @@
     };
   }
 
-  /** Staggered repeating watermark: FUTSAL / BADMINTON */
   function buildSportWatermark() {
     if (document.getElementById('sportWm')) return;
     var cur = currentFile();
@@ -89,7 +90,6 @@
     var rows = 10;
     var html = '';
     for (var i = 0; i < rows; i++) {
-      // Alternate density slightly for asymmetric feel
       var line = i % 2 === 0 ? unit + unit : '   ' + unit + unit;
       html += '<div class="sport-wm-row">' + line + '</div>';
     }
