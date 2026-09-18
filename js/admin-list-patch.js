@@ -1,0 +1,140 @@
+// Patch futsal admin: list matches, open one for controls, back button
+(function () {
+  var selectedMatchId = null;
+  var cachedMatches = [];
+
+  function statusChip(status) {
+    var map = {
+      not_started: ['Upcoming', 'bg-blue-600/30 text-blue-300'],
+      live: ['LIVE', 'bg-red-600 text-white'],
+      half_time: ['HT', 'bg-orange-600 text-white'],
+      penalties: ['PENS', 'bg-amber-500 text-slate-900'],
+      finished: ['FT', 'bg-slate-600 text-slate-200'],
+      walkover: ['WO', 'bg-slate-600 text-slate-200']
+    };
+    var pair = map[status] || [status || '?', 'bg-slate-700 text-slate-300'];
+    return '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full ' + pair[1] + '">' + pair[0] + '</span>';
+  }
+
+  function setAddVisible(show) {
+    var box = document.getElementById('futsalAddBox');
+    if (box) box.classList.toggle('hidden', !show);
+    var title = document.getElementById('futsalListTitle');
+    if (title) title.textContent = selectedMatchId ? 'Control match' : 'Matches';
+  }
+
+  window.showMatchList = function () {
+    selectedMatchId = null;
+    setAddVisible(true);
+    if (typeof window.loadAdminData === 'function') window.loadAdminData();
+  };
+
+  window.openFutsalMatch = function (id) {
+    selectedMatchId = id;
+    setAddVisible(false);
+    if (typeof window.loadAdminData === 'function') window.loadAdminData();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  function renderListRow(m) {
+    var home = typeof getTeamName === 'function' ? getTeamName(m.home_team_id) : 'Home';
+    var away = typeof getTeamName === 'function' ? getTeamName(m.away_team_id) : 'Away';
+    var hs = Number(m.home_score) || 0;
+    var as = Number(m.away_score) || 0;
+    var pensOn = !!m.pens_on || m.status === 'penalties';
+    var ph = Number(m.pen_home) || 0;
+    var pa = Number(m.pen_away) || 0;
+    var penLine = pensOn ? '<div class="text-[11px] text-amber-400 font-semibold">Pens ' + ph + '-' + pa + '</div>' : '';
+    return '<button type="button" onclick="openFutsalMatch(\'' + m.id + '\')" class="w-full text-left bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">' +
+      '<div class="flex justify-between mb-1">' + statusChip(m.status) +
+      '<span class="text-[11px] text-slate-500">' + (m.group_name || '') + '</span></div>' +
+      '<div class="flex items-center gap-2">' +
+      '<span class="flex-1 text-sm font-semibold text-right truncate">' + home + '</span>' +
+      '<span class="text-lg font-extrabold">' + hs + '-' + as + '</span>' +
+      '<span class="flex-1 text-sm font-semibold truncate">' + away + '</span></div>' +
+      penLine +
+      '<div class="text-[11px] text-green-400 text-center mt-1">Open controls</div></button>';
+  }
+
+  var _orig = window.loadAdminData;
+  window.loadAdminData = async function () {
+    var container = document.getElementById('adminMatches');
+    if (!container) return;
+    if (!selectedMatchId) {
+      container.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Loading matches...</p>';
+    }
+    var sb = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    if (!sb || typeof sb.from !== 'function') {
+      container.innerHTML = '<p class="text-red-400 text-sm text-center">Supabase not ready</p>';
+      return;
+    }
+    try {
+      if (typeof _orig === 'function') {
+        // Use original data loading by temporarily replacing container fill
+      }
+      var teamsRes = await sb.from('teams').select('*').order('name');
+      if (teamsRes.error) throw teamsRes.error;
+      if (typeof allTeams !== 'undefined') allTeams = teamsRes.data || [];
+      else window.allTeams = teamsRes.data || [];
+      var homeSelect = document.getElementById('newHome');
+      var awaySelect = document.getElementById('newAway');
+      if (homeSelect && awaySelect && teamsRes.data) {
+        var opts = teamsRes.data.map(function (t) {
+          return '<option value="' + t.id + '">' + t.name + '</option>';
+        }).join('');
+        homeSelect.innerHTML = opts;
+        awaySelect.innerHTML = opts;
+      }
+      var matchesRes = await sb.from('matches').select('*').order('kickoff_time', { ascending: true });
+      if (matchesRes.error) throw matchesRes.error;
+      cachedMatches = matchesRes.data || [];
+      var goalsRes = await sb.from('goals').select('*');
+      if (typeof allGoals !== 'undefined') allGoals = goalsRes.data || [];
+      try {
+        var cardsRes = await sb.from('cards').select('*');
+        if (typeof allCards !== 'undefined') allCards = cardsRes.data || [];
+      } catch (e) {}
+
+      if (selectedMatchId) {
+        var m = cachedMatches.find(function (x) { return String(x.id) === String(selectedMatchId); });
+        if (!m) {
+          selectedMatchId = null;
+          setAddVisible(true);
+          return window.loadAdminData();
+        }
+        setAddVisible(false);
+        var cardHtml = typeof renderAdminCard === 'function' ? renderAdminCard(m) : '<p>Controls unavailable</p>';
+        container.innerHTML =
+          '<button type="button" onclick="showMatchList()" class="flex items-center gap-2 text-sm text-green-400 font-semibold mb-4">' +
+          '<span class="text-lg">&larr;</span> Back to matches</button>' + cardHtml;
+        return;
+      }
+
+      setAddVisible(true);
+      if (!cachedMatches.length) {
+        container.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">No matches yet.<br>Add one below.</p>';
+        return;
+      }
+      var live = cachedMatches.filter(function (m) {
+        return m.status === 'live' || m.status === 'half_time' || m.status === 'penalties';
+      });
+      var up = cachedMatches.filter(function (m) { return m.status === 'not_started'; });
+      var done = cachedMatches.filter(function (m) {
+        return m.status === 'finished' || m.status === 'walkover';
+      });
+      function section(title, list) {
+        if (!list.length) return '';
+        return '<p class="text-xs font-bold text-slate-500 uppercase mb-2 mt-4">' + title + '</p>' +
+          '<div class="space-y-2">' + list.map(renderListRow).join('') + '</div>';
+      }
+      container.innerHTML =
+        section('Live / Pens', live) +
+        section('Upcoming', up) +
+        section('Finished', done) +
+        '<p class="text-xs text-slate-500 text-center pt-2">Tap a match to control scores</p>';
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = '<p class="text-red-400 text-sm text-center">Error: ' + (err.message || err) + '</p>';
+    }
+  };
+})();
