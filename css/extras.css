@@ -1,1 +1,8 @@
-/* appended HT styles - full file kept via merge */
+/* Lex Liga extras – restore + HT badge */
+
+/* Half-time badge on live cards */
+.status-half_time,
+.status-badge.status-half_time {
+  background: #f97316 !important;
+  color: #fff !important;
+}
