@@ -1,4 +1,4 @@
-// Lex Liga Badminton Admin - list then detail controls
+// Lex Liga Badminton Admin - list then open one match
 function getSb() {
   return window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
 }
@@ -85,25 +85,26 @@ function renderBmRow(m) {
     '<span class="text-[11px] text-slate-500 truncate">' + (m.category || '') + '</span></div>' +
     '<div class="flex items-center gap-2">' +
     '<span class="flex-1 text-sm font-semibold truncate text-right">' + (m.player1 || '') + '</span>' +
-    '<span class="text-lg font-extrabold tabular-nums px-1">' + p1 + '&ndash;' + p2 + '</span>' +
+    '<span class="text-lg font-extrabold tabular-nums px-1">' + p1 + '-' + p2 + '</span>' +
     '<span class="flex-1 text-sm font-semibold truncate">' + (m.player2 || '') + '</span></div>' +
-    '<div class="text-[11px] text-green-400/80 mt-1 text-center">Open controls &rarr;</div></button>';
+    '<div class="text-[11px] text-green-400/80 mt-1 text-center">Open controls</div></button>';
 }
 function renderBmDetail(m) {
   var p1 = Number(m.g1_p1) || 0, p2 = Number(m.g1_p2) || 0;
   var isLive = m.status === 'live', isFin = m.status === 'finished';
   var n1 = (m.player1 || 'P1').split(' ')[0], n2 = (m.player2 || 'P2').split(' ')[0];
+  var id = m.id;
   return '<div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">' +
     '<div class="text-center mb-5"><div class="flex justify-center mb-2">' + bmStatusChip(m.status) + '</div>' +
     '<div class="text-xs text-slate-400 mb-2">' + (m.category || '') + '</div>' +
     '<div class="font-bold text-lg mb-1">' + (m.player1 || '') + '</div>' +
-    '<div class="text-4xl font-extrabold my-2">' + p1 + ' <span class="text-slate-500">&ndash;</span> ' + p2 + '</div>' +
+    '<div class="text-4xl font-extrabold my-2">' + p1 + ' - ' + p2 + '</div>' +
     '<div class="font-bold text-lg">' + (m.player2 || '') + '</div></div>' +
     '<div class="grid grid-cols-2 gap-3 mb-4">' +
-    '<button type="button" onclick="bmScore(\'' + m.id + '\',\'p1\',1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n1 + '</button>' +
-    '<button type="button" onclick="bmScore(\'' + m.id + '\',\'p2\',1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n2 + '</button></div>' +
+    '<button type="button" onclick="bmScore(\'' + id + '\',\'p1\',1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n1 + '</button>' +
+    '<button type="button" onclick="bmScore(\'' + id + '\',\'p2\',1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n2 + '</button></div>' +
     '<div class="grid grid-cols-2 gap-3 mb-5">' +
-    '<button type="button" onclick="bmScore(\'' + m.id + '\',\'p1\',-1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">-1 ' + n1 + '</button>' +
-    '<button type="button" onclick="bmScore(\'' + m.id + '\',\'p2\',-1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">-1 ' + n2 + '</button></div>' +
+    '<button type="button" onclick="bmScore(\'' + id + '\',\'p1\',-1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">-1 ' + n1 + '</button>' +
+    '<button type="button" onclick="bmScore(\'' + id + '\',\'p2\',-1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">-1 ' + n2 + '</button></div>' +
     '<div class="grid grid-cols-3 gap-2 mb-5">' +
-    '<button type="button" onclick="bmStatus(\'' + m.id + '\',\'not_started\')
+    '<button type="button" onclick="bmStatus(\'' + id + '\',\'not_started\')
