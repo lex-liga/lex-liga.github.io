@@ -6,9 +6,8 @@
     { name: "Mr.Butterfly FC", players: ["Rudra Tak", "Yuvraj Sonker", "Kunnal Kumar", "Alok Kumar", "Om Mishra", "Saptak Das"] },
     { name: "Thassa United FC", players: ["Ayushhmaan Thakur", "Ayush Mishra", "Aditya Saini", "Dev Nandan", "Anshuman Singh", "Jatin Narula"] },
     { name: "Beer Pressure FC", players: ["Francis", "Sajora", "Adhitya", "Chirag", "Dhyeya Gohil", "Bhaumik", "Ranjit"] },
-    { name: "One last Time!", players: ["Shree", "Varun", "Nayan", "Kawar", "Ritesh", "Nikesh", "Rishiraj"] },
-    { name: "Hazel Aid Fc", players: ["Aadithyan M", "Siddharth Purohit", "Nakul Dev", "Surya", "Abhijeet", "Akshat Tripathi", "Ujjwal"] },
-    { name: "Humble FC", players: ["Abhijeet", "Akshat", "Nakul", "Ujjwal", "Siddharth Purohit", "Aadithyan"] }
+    { name: "One Last Time", players: ["Shree", "Varun", "Nayan", "Kawar", "Ritesh", "Nikesh", "Rishiraj"] },
+    { name: "Hazel Aid FC", players: ["Aadithyan M", "Siddharth Purohit", "Nakul Dev", "Surya", "Abhijeet", "Akshat Tripathi", "Ujjwal"] }
   ];
   var futsalWomen = ["Antara Joshi (Sem 1)", "Bhavika Tripathi (Sem 1)", "Avika Litoria (Sem 1)", "Astha (Sem 1)", "Mansi (Sem 3)", "Tuhinanshu (Sem 3)", "Subhashini (Sem 3)"];
 
