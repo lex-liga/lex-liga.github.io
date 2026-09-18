@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fixtures & Standings — Lex Liga</title>
+  <title>Fixtures — Lex Liga</title>
   <meta name="description" content="Fixtures, standings and official rulebooks for Lex Liga." />
   <meta name="theme-color" content="#0b1120" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,40 +16,12 @@
 <body class="min-h-screen">
   <header class="site-header sticky top-0 z-50"></header>
 
-  <section class="hero-shell hero-shell-compact">
-    <div class="hero-grid"></div>
-    <div class="hero-glow hero-glow-one"></div>
-    <div class="hero-content max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="hero-copy">
-        <div class="hero-kicker"><span class="hero-live-dot"></span> TOURNAMENT CENTRE</div>
-        <h1>LEX <span>LIGA</span></h1>
-        <p class="hero-title">FIXTURES & STANDINGS</p>
-        <div class="hero-divider"></div>
-        <div class="hero-meta"><span>19–20 SEP</span><span>•</span><span>MESS GROUND</span><span>•</span><span>SPORTS ARENA</span></div>
-      </div>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10 pb-24">
+    <div>
+      <p class="section-eyebrow">SCHEDULE</p>
+      <h1 class="text-2xl font-extrabold">Fixtures &amp; Rules</h1>
+      <p class="text-slate-400 text-sm mt-1">Matches · standings · official rulebooks</p>
     </div>
-  </section>
-
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
-    <div class="update-bar">
-      <div class="update-status"><span class="status-pulse"></span><span id="lastUpdated">Loading…</span></div>
-      <button id="refreshBtn" class="refresh-button" type="button">↻ Refresh</button>
-    </div>
-
-    <section>
-      <div class="section-heading-row">
-        <div><p class="section-eyebrow">MATCH CENTRE</p><h2>Live Now</h2></div>
-        <span class="section-chip">LIVE</span>
-      </div>
-      <div id="liveMatchesFixtures" class="space-y-4"><p class="empty-state">No live matches right now</p></div>
-    </section>
-
-    <section>
-      <div class="section-heading-row">
-        <div><p class="section-eyebrow">GROUP TABLES</p><h2>Standings</h2></div>
-      </div>
-      <div id="fullStandings" class="space-y-6"><p class="empty-state">Loading standings...</p></div>
-    </section>
 
     <section>
       <div class="section-heading-row">
@@ -60,7 +32,7 @@
 
     <section class="info-section rounded-2xl p-5 sm:p-6">
       <div class="section-heading-row mb-4">
-        <div><p class="section-eyebrow">OFFICIAL</p><h2>Rulebooks & Fixtures</h2></div>
+        <div><p class="section-eyebrow">OFFICIAL</p><h2>Rulebooks &amp; Fixtures</h2></div>
       </div>
       <div class="grid sm:grid-cols-3 gap-3">
         <a href="assets/rules/futsal-rulebook.pdf" target="_blank" rel="noopener"
@@ -82,12 +54,11 @@
           <div class="text-xs text-slate-400 mt-1">Upload when ready</div>
         </a>
       </div>
-      <p class="text-xs text-slate-500 mt-3">Upload PDFs into <code class="text-slate-400">assets/rules/</code> on GitHub if links show 404.</p>
     </section>
 
     <section class="info-section rounded-2xl p-5 sm:p-6">
       <div class="section-heading-row mb-4">
-        <div><p class="section-eyebrow">FUTSAL</p><h2>Rules & Format</h2></div>
+        <div><p class="section-eyebrow">⚽ FUTSAL</p><h2>Rules &amp; Format</h2></div>
       </div>
       <ul class="rules-list">
         <li><span>01</span><p>5v5 + 2 rolling substitutes (max 7 roster). At least 4 players to start.</p></li>
@@ -97,6 +68,19 @@
         <li><span>05</span><p>Knockout draw → extra time → 5 penalties → sudden death.</p></li>
         <li><span>06</span><p>Yellow = 1-minute suspension (team plays short). Red = sent off.</p></li>
         <li><span>07</span><p>No offside. Fair play required. Referee decisions are final.</p></li>
+      </ul>
+    </section>
+
+    <section class="info-section rounded-2xl p-5 sm:p-6">
+      <div class="section-heading-row mb-4">
+        <div><p class="section-eyebrow">🏸 BADMINTON</p><h2>Rules &amp; Format</h2></div>
+      </div>
+      <ul class="rules-list">
+        <li><span>01</span><p>Knock-out from the first round (no league). Only registered players.</p></li>
+        <li><span>02</span><p>Till Quarter-Finals: single set to 15. Golden point at 14–14 (next rally wins).</p></li>
+        <li><span>03</span><p>Semi-Finals &amp; Final: best of 3 to 21, win by 2, cap 30 (at 29–29 next point wins).</p></li>
+        <li><span>04</span><p>Non-marking shoes compulsory. Report 15 minutes before match.</p></li>
+        <li><span>05</span><p>Walkover after 10 minutes no-show. Umpire's decision is final.</p></li>
       </ul>
     </section>
   </main>
@@ -110,7 +94,7 @@
         </div>
         <div class="footer-credit-block">
           <span class="footer-label">Managed by</span>
-          <strong class="footer-name">Sports & Cultural Committee</strong>
+          <strong class="footer-name">Sports &amp; Cultural Committee</strong>
           <span class="footer-subtext">(SACC), SLFJPS, NFSU</span>
         </div>
       </div>
