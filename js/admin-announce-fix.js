@@ -1,3 +1,11 @@
+/* Load futsal list/detail patch on admin page */
+(function () {
+  if (document.querySelector('script[src*="admin-list-patch"]')) return;
+  var s = document.createElement('script');
+  s.src = 'js/admin-list-patch.js?v=2';
+  document.body.appendChild(s);
+})();
+
 /* Patch announce admin to allow multiple LIVE messages */
 (function () {
   function escapeHtml(s) {
@@ -48,7 +56,6 @@
       return;
     }
     st.textContent = 'Saving…';
-    // Do NOT deactivate other announcements — they scroll in sequence
     var res = await sb.from('announcements').insert({
       message: msg,
       active: active,
