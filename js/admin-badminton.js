@@ -1,158 +1,146 @@
-// Lex Liga Badminton Admin
-// Single match score (like futsal) — not best of 3
-// Category = stage: Round 1, QF, SF, Final, etc.
-
+// Lex Liga Badminton Admin – list → open match (single-score like futsal)
 function getSb() {
   return window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
 }
 
-function scoreOf(m, side) {
-  if (side === 1) {
-    if (m.score_p1 != null) return Number(m.score_p1) || 0;
-    return Number(m.g1_p1) || 0;
-  }
-  if (m.score_p2 != null) return Number(m.score_p2) || 0;
-  return Number(m.g1_p2) || 0;
+var bmMatches = [];
+var selectedBmId = null;
+
+function bmStatusChip(status) {
+  var map = {
+    not_started: ['Upcoming', 'bg-blue-600/30 text-blue-300'],
+    live: ['LIVE', 'bg-red-600 text-white'],
+    finished: ['FT', 'bg-slate-600 text-slate-200']
+  };
+  var pair = map[status] || [status || '?', 'bg-slate-700 text-slate-300'];
+  return '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full ' + pair[1] + '">' + pair[0] + '</span>';
 }
 
-async function loadBadmintonAdmin() {
+function setBmAddVisible(show) {
+  var box = document.getElementById('bmAddBox');
+  if (box) box.classList.toggle('hidden', !show);
+  var title = document.getElementById('bmListTitle');
+  if (title) title.textContent = selectedBmId ? 'Control match' : 'Matches';
+}
+
+window.showBmList = function () {
+  selectedBmId = null;
+  setBmAddVisible(true);
+  renderBmUI();
+};
+
+window.openBmMatch = function (id) {
+  selectedBmId = id;
+  setBmAddVisible(false);
+  renderBmUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.loadBadmintonAdmin = async function () {
   var container = document.getElementById('adminBadmintonMatches');
   if (!container) return;
-  container.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">Loading matches...</p>';
+  if (!selectedBmId) container.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Loading...</p>';
   var sb = getSb();
   if (!sb || typeof sb.from !== 'function') {
-    container.innerHTML = '<p class="text-red-400 text-sm text-center px-3">Supabase client not ready.<br>Hard-refresh this page (Ctrl+Shift+R).</p>';
+    container.innerHTML = '<p class="text-red-400 text-sm text-center">Supabase not ready</p>';
     return;
   }
   try {
-    var res = await sb.from('badminton_matches').select('*').order('created_at', { ascending: false });
-    if (res.error) {
-      container.innerHTML = '<p class="text-red-400 text-sm text-center px-3">Error: ' + res.error.message + '</p>';
-      return;
-    }
-    var data = res.data || [];
-    if (!data.length) {
-      container.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">No matches yet.<br>Add one below.</p>';
-      return;
-    }
-    container.innerHTML = data.map(renderBadmintonCard).join('');
-  } catch (err) {
-    container.innerHTML = '<p class="text-red-400 text-sm text-center px-3">Error: ' + (err.message || err) + '</p>';
+    var res = await sb.from('badminton_matches').select('*').order('created_at', { ascending: true });
+    if (res.error) throw res.error;
+    bmMatches = res.data || [];
+    renderBmUI();
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = '<p class="text-red-400 text-sm text-center">' + (e.message || e) + '</p>';
   }
-}
-window.loadBadmintonAdmin = loadBadmintonAdmin;
+};
 
-function renderBadmintonCard(m) {
-  var p1 = scoreOf(m, 1);
-  var p2 = scoreOf(m, 2);
-  var isFinished = m.status === 'finished';
-  var isLive = m.status === 'live';
-  var isUpcoming = m.status === 'not_started';
-  var p1short = String(m.player1 || 'P1').split(' ')[0];
-  var p2short = String(m.player2 || 'P2').split(' ')[0];
-  var winner = '';
-  if (isFinished) {
-    if (p1 > p2) winner = m.player1;
-    else if (p2 > p1) winner = m.player2;
+function renderBmUI() {
+  var container = document.getElementById('adminBadmintonMatches');
+  if (!container) return;
+
+  if (selectedBmId) {
+    var m = bmMatches.find(function (x) { return String(x.id) === String(selectedBmId); });
+    if (!m) {
+      selectedBmId = null;
+      setBmAddVisible(true);
+      return renderBmUI();
+    }
+    setBmAddVisible(false);
+    container.innerHTML =
+      '<button type="button" onclick="showBmList()" class="flex items-center gap-2 text-sm text-green-400 font-semibold mb-4 -mt-1">' +
+      '<span class="text-lg leading-none">←</span> Back to matches</button>' +
+      renderBmDetail(m);
+    return;
   }
+
+  setBmAddVisible(true);
+  if (!bmMatches.length) {
+    container.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">No matches yet.<br>Add one below.</p>';
+    return;
+  }
+
+  var live = bmMatches.filter(function (m) { return m.status === 'live'; });
+  var up = bmMatches.filter(function (m) { return m.status === 'not_started'; });
+  var done = bmMatches.filter(function (m) { return m.status === 'finished'; });
+
+  function section(title, list) {
+    if (!list.length) return '';
+    return '<p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 mt-4">' + title + '</p>' +
+      '<div class="space-y-2 mb-2">' + list.map(renderBmRow).join('') + '</div>';
+  }
+
+  container.innerHTML =
+    section('Live', live) +
+    section('Upcoming', up) +
+    section('Finished', done) +
+    '<p class="text-xs text-slate-500 text-center pt-2">Tap a match to control scores</p>';
+}
+
+function renderBmRow(m) {
+  var p1 = Number(m.g1_p1) || 0;
+  var p2 = Number(m.g1_p2) || 0;
   return (
-    '<div class="bg-slate-800 rounded-2xl p-5 border border-slate-700" data-id="' + m.id + '">' +
-      '<div class="text-center mb-4">' +
-        '<div class="text-xs text-slate-400 mb-1">' + (m.category || 'Match') + '</div>' +
-        '<div class="font-bold text-lg">' + (m.player1 || '') + '</div>' +
-        '<div class="text-4xl font-extrabold my-2">' + p1 + ' – ' + p2 + '</div>' +
-        '<div class="font-bold text-lg">' + (m.player2 || '') + '</div>' +
-        (winner ? '<div class="text-green-400 text-sm font-bold mt-2">Winner: ' + winner + '</div>' : '') +
+    '<button type="button" onclick="openBmMatch(\'' + m.id + '\')" ' +
+    'class="w-full text-left bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded-xl px-4 py-3 active:scale-[0.99] transition">' +
+      '<div class="flex items-center justify-between gap-2 mb-1">' +
+        bmStatusChip(m.status) +
+        '<span class="text-[11px] text-slate-500 truncate">' + (m.category || '') + '</span>' +
       '</div>' +
-      '<div class="grid grid-cols-2 gap-3 mb-3">' +
-        '<button type="button" onclick="bmPoint(\'' + m.id + '\', 1)" class="w-full big-btn bg-green-500 text-slate-900 rounded-xl py-4 font-bold">+1 ' + p1short + '</button>' +
-        '<button type="button" onclick="bmPoint(\'' + m.id + '\', 2)" class="w-full big-btn bg-green-500 text-slate-900 rounded-xl py-4 font-bold">+1 ' + p2short + '</button>' +
+      '<div class="flex items-center gap-2">' +
+        '<span class="flex-1 text-sm font-semibold truncate text-right">' + (m.player1 || '') + '</span>' +
+        '<span class="text-lg font-extrabold tabular-nums px-1">' + p1 + '–' + p2 + '</span>' +
+        '<span class="flex-1 text-sm font-semibold truncate">' + (m.player2 || '') + '</span>' +
       '</div>' +
-      '<div class="grid grid-cols-2 gap-3 mb-4">' +
-        '<button type="button" onclick="bmPoint(\'' + m.id + '\', 1, -1)" class="py-3 bg-slate-700 rounded-xl text-sm font-semibold">–1</button>' +
-        '<button type="button" onclick="bmPoint(\'' + m.id + '\', 2, -1)" class="py-3 bg-slate-700 rounded-xl text-sm font-semibold">–1</button>' +
-      '</div>' +
-      '<div class="grid grid-cols-3 gap-2 mb-3">' +
-        '<button type="button" onclick="bmStatus(\'' + m.id + '\', \'not_started\')" class="status-btn rounded-xl py-2 text-xs font-semibold ' + (isUpcoming ? 'bg-blue-600 text-white' : 'bg-slate-700') + '">Upcoming</button>' +
-        '<button type="button" onclick="bmStatus(\'' + m.id + '\', \'live\')" class="status-btn rounded-xl py-2 text-xs font-semibold ' + (isLive ? 'bg-red-600 text-white' : 'bg-slate-700') + '">LIVE</button>' +
-        '<button type="button" onclick="bmStatus(\'' + m.id + '\', \'finished\')" class="status-btn rounded-xl py-2 text-xs font-semibold ' + (isFinished ? 'bg-slate-500 text-white' : 'bg-slate-700') + '">Finished</button>' +
-      '</div>' +
-      '<button type="button" onclick="bmReset(\'' + m.id + '\')" class="w-full py-2 mb-2 bg-slate-700 rounded-xl text-sm text-slate-300">Reset score</button>' +
-      '<button type="button" onclick="bmDelete(\'' + m.id + '\')" class="text-xs text-red-400 underline w-full text-center">Delete match</button>' +
-    '</div>'
+      '<div class="text-[11px] text-green-400/80 mt-1 text-center">Open controls →</div>' +
+    '</button>'
   );
 }
 
-window.bmPoint = async function (id, side, delta) {
-  if (delta === undefined) delta = 1;
-  var sb = getSb();
-  try {
-    var res = await sb.from('badminton_matches').select('*').eq('id', id).single();
-    if (res.error || !res.data) { alert(res.error ? res.error.message : 'Not found'); return; }
-    var m = res.data;
-    var p1 = scoreOf(m, 1);
-    var p2 = scoreOf(m, 2);
-    if (side === 1) p1 = Math.max(0, p1 + delta);
-    else p2 = Math.max(0, p2 + delta);
-    var update = {
-      g1_p1: p1,
-      g1_p2: p2,
-      games_p1: 0,
-      games_p2: 0,
-      current_game: 1,
-      updated_at: new Date().toISOString()
-    };
-    if (m.status === 'not_started') update.status = 'live';
-    var up = await sb.from('badminton_matches').update(update).eq('id', id);
-    if (up.error) alert(up.error.message);
-    loadBadmintonAdmin();
-  } catch (e) { alert(e.message || e); }
-};
-
-window.bmReset = async function (id) {
-  if (!confirm('Reset score to 0–0?')) return;
-  var sb = getSb();
-  var up = await sb.from('badminton_matches').update({
-    g1_p1: 0, g1_p2: 0, g2_p1: 0, g2_p2: 0, g3_p1: 0, g3_p2: 0,
-    games_p1: 0, games_p2: 0, current_game: 1,
-    updated_at: new Date().toISOString()
-  }).eq('id', id);
-  if (up.error) alert(up.error.message);
-  loadBadmintonAdmin();
-};
-
-window.bmStatus = async function (id, status) {
-  var sb = getSb();
-  var up = await sb.from('badminton_matches').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id);
-  if (up.error) alert(up.error.message);
-  loadBadmintonAdmin();
-};
-
-window.bmDelete = async function (id) {
-  if (!confirm('Delete this match?')) return;
-  var sb = getSb();
-  var up = await sb.from('badminton_matches').delete().eq('id', id);
-  if (up.error) alert(up.error.message);
-  loadBadmintonAdmin();
-};
-
-window.addBadmintonMatch = async function () {
-  var p1 = ((document.getElementById('bmP1') && document.getElementById('bmP1').value) || '').trim();
-  var p2 = ((document.getElementById('bmP2') && document.getElementById('bmP2').value) || '').trim();
-  var cat = ((document.getElementById('bmCategory') && document.getElementById('bmCategory').value) || '').trim();
-  if (!p1 || !p2) { alert('Enter both names'); return; }
-  var sb = getSb();
-  if (!sb || typeof sb.from !== 'function') { alert('Supabase not ready'); return; }
-  var ins = await sb.from('badminton_matches').insert({
-    player1: p1, player2: p2, category: cat || 'Round 1',
-    status: 'not_started', current_game: 1, games_p1: 0, games_p2: 0,
-    g1_p1: 0, g1_p2: 0, g2_p1: 0, g2_p2: 0, g3_p1: 0, g3_p2: 0
-  });
-  if (ins.error) { alert('Could not add:\n' + ins.error.message); return; }
-  document.getElementById('bmP1').value = '';
-  document.getElementById('bmP2').value = '';
-  document.getElementById('bmCategory').value = '';
-  loadBadmintonAdmin();
-};
-
-document.getElementById('refreshBadminton') && document.getElementById('refreshBadminton').addEventListener('click', loadBadmintonAdmin);
+function renderBmDetail(m) {
+  var p1 = Number(m.g1_p1) || 0;
+  var p2 = Number(m.g1_p2) || 0;
+  var isLive = m.status === 'live';
+  var isFin = m.status === 'finished';
+  var n1 = (m.player1 || 'P1').split(' ')[0];
+  var n2 = (m.player2 || 'P2').split(' ')[0];
+  return (
+    '<div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">' +
+      '<div class="text-center mb-5">' +
+        '<div class="flex justify-center mb-2">' + bmStatusChip(m.status) + '</div>' +
+        '<div class="text-xs text-slate-400 mb-2">' + (m.category || '') + '</div>' +
+        '<div class="font-bold text-lg mb-1">' + (m.player1 || '') + '</div>' +
+        '<div class="text-4xl font-extrabold my-2">' + p1 + ' <span class="text-slate-500">–</span> ' + p2 + '</div>' +
+        '<div class="font-bold text-lg">' + (m.player2 || '') + '</div>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 gap-3 mb-4">' +
+        '<button type="button" onclick="bmScore(\'' + m.id + '\', \'p1\', 1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n1 + '</button>' +
+        '<button type="button" onclick="bmScore(\'' + m.id + '\', \'p2\', 1)" class="w-full py-4 bg-green-500 text-slate-900 rounded-xl font-bold">+1 ' + n2 + '</button>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 gap-3 mb-5">' +
+        '<button type="button" onclick="bmScore(\'' + m.id + '\', \'p1\', -1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">–1 ' + n1 + '</button>' +
+        '<button type="button" onclick="bmScore(\'' + m.id + '\', \'p2\', -1)" class="w-full py-3 bg-slate-700 rounded-xl text-sm font-semibold">–1 ' + n2 + '</button>' +
+      '</div>' +
+      '<div class="grid grid-cols-3 gap-2 mb-5">' +
+        '<button type="button" onclick="bmStatus(\'' + m.id + '\', \'not_started\')
