@@ -15,13 +15,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      max-width: 280px;
+      max-width: 220px;
       margin: 0 auto;
     }
     .bm-hero-art img {
       width: 100%;
       height: auto;
-      filter: drop-shadow(0 12px 40px rgba(239,68,68,0.35));
+      object-fit: contain;
+      opacity: 0.95;
+    }
+    @media (max-width: 640px) {
+      .bm-hero-art { max-width: 140px; margin-top: 1rem; }
     }
   </style>
 </head>
@@ -40,8 +44,7 @@
         <div class="hero-meta"><span>KNOCKOUT</span><span>•</span><span>19–20 SEP</span><span>•</span><span>SPORTS ARENA</span></div>
       </div>
       <div class="bm-hero-art" aria-hidden="true">
-        <img src="assets/bm-logo.jpg" alt="Lex Liga Badminton" width="480" height="520" loading="eager"
-          onerror="this.onerror=null;this.src='assets/badminton-hero.png';" />
+        <img src="assets/badminton-hero.png" alt="" width="320" height="360" loading="eager" />
       </div>
     </div>
   </section>
@@ -52,25 +55,31 @@
         <div><p class="section-eyebrow">MATCH CENTRE</p><h2>Live Now</h2></div>
         <span class="section-chip">LIVE</span>
       </div>
-      <div id="liveMatches" class="space-y-4"><p class="empty-state">Loading…</p></div>
+      <div id="bmLive" class="space-y-4"><p class="empty-state">No live matches</p></div>
     </section>
     <section>
       <div class="section-heading-row">
         <div><p class="section-eyebrow">LATEST</p><h2>Recent Results</h2></div>
       </div>
-      <div id="recentResults" class="grid lg:grid-cols-2 gap-4"><p class="empty-state">Loading…</p></div>
+      <div id="bmRecent" class="grid lg:grid-cols-2 gap-4"><p class="empty-state">No results yet</p></div>
+    </section>
+    <section>
+      <div class="section-heading-row">
+        <div><p class="section-eyebrow">DRAW</p><h2>All Matches</h2></div>
+      </div>
+      <div id="bmAll" class="space-y-3"><p class="empty-state">No fixtures yet — add from Badminton admin</p></div>
     </section>
     <section class="info-section rounded-2xl p-5 sm:p-6">
       <div class="section-heading-row mb-4">
         <div>
           <p class="section-eyebrow">TOURNAMENT</p>
-          <h2>Rules &amp; Format</h2>
+          <h2>Rules & Format</h2>
         </div>
       </div>
       <ul class="rules-list">
         <li><span>01</span><p>Knock-out from the first round (no league). Only registered players.</p></li>
         <li><span>02</span><p>Till Quarter-Finals: single set to 15. Golden point at 14–14 (next rally wins).</p></li>
-        <li><span>03</span><p>Semi-Finals &amp; Final: best of 3 to 21, win by 2, cap 30 (at 29–29 next point wins).</p></li>
+        <li><span>03</span><p>Semi-Finals & Final: best of 3 to 21, win by 2, cap 30 (at 29–29 next point wins).</p></li>
         <li><span>04</span><p>Non-marking shoes compulsory. Report 15 minutes before match.</p></li>
         <li><span>05</span><p>Walkover after 10 minutes no-show. Umpire's decision is final.</p></li>
         <li><span>06</span><p><a href="assets/rules/badminton-rulebook.pdf" class="text-green-400 underline" target="_blank" rel="noopener">Download official rulebook (PDF)</a></p></li>
@@ -87,7 +96,7 @@
         </div>
         <div class="footer-credit-block">
           <span class="footer-label">Managed by</span>
-          <strong class="footer-name">Sports &amp; Cultural Committee</strong>
+          <strong class="footer-name">Sports & Cultural Committee</strong>
           <span class="footer-subtext">(SACC), SLFJPS, NFSU</span>
         </div>
       </div>
