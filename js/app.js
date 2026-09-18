@@ -1,10 +1,10 @@
-/* Lex Liga Futsal – local app with penalty / sudden death display */
+/* Lex Liga Futsal – loads local futsal-app with pens support */
 (function () {
   document.documentElement.classList.add('dark');
   if (document.body) document.body.classList.remove('light');
   try { localStorage.setItem('theme', 'dark'); } catch (e) {}
   var s = document.createElement('script');
-  s.src = 'js/futsal-app.js?v=pens2';
+  s.src = 'js/futsal-app.js?v=pens3';
   s.async = false;
   s.onload = function () {
     document.documentElement.classList.add('dark');
