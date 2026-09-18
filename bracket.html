@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Knockout Bracket — Lex Liga</title>
+  <title>Bracket &amp; Fixtures — Lex Liga</title>
   <meta name="theme-color" content="#0b1120" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,6 +11,31 @@
   <link rel="stylesheet" href="css/extras.css" />
   <link rel="manifest" href="manifest.json" />
   <style>
+    .fx-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.15);
+      border-radius: 0.85rem;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.55rem;
+    }
+    .fx-num {
+      flex-shrink: 0; width: 1.75rem; height: 1.75rem;
+      border-radius: 999px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800;
+      background: rgba(34,197,94,0.15); color: #4ade80;
+    }
+    .fx-teams { flex: 1; min-width: 0; }
+    .fx-teams strong { font-size: 0.9rem; color: #f1f5f9; }
+    .fx-vs { color: #64748b; font-size: 0.7rem; font-weight: 700; margin: 0 0.35rem; }
+    .fx-score { font-weight: 800; font-size: 1rem; color: #e2e8f0; white-space: nowrap; }
+    .fx-status {
+      font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+      padding: 0.2rem 0.5rem; border-radius: 999px;
+    }
+    .fx-status.live { background: #dc2626; color: #fff; }
+    .fx-status.done { background: rgba(100,116,139,0.4); color: #cbd5e1; }
+    .fx-status.up { background: rgba(37,99,235,0.25); color: #93c5fd; }
     .bracket-round { min-width: 200px; }
     .bracket-card {
       background: rgba(15,23,42,0.9);
@@ -21,29 +46,35 @@
     }
     .bracket-card.live { border-color: rgba(239,68,68,0.5); }
     .bracket-card.done { border-color: rgba(34,197,94,0.35); }
-    .bracket-scroll {
-      display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: 1rem;
-    }
+    .bracket-scroll { display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: 1rem; }
   </style>
 </head>
 <body class="min-h-screen">
   <header class="site-header sticky top-0 z-50"></header>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10 pb-24">
     <div>
-      <p class="section-eyebrow">KNOCKOUT</p>
-      <h1 class="text-2xl font-extrabold">Tournament Bracket</h1>
-      <p class="text-slate-400 text-sm mt-1">Quarter-finals · Semi-finals · Final</p>
+      <p class="section-eyebrow">TOURNAMENT</p>
+      <h1 class="text-2xl font-extrabold">Fixtures &amp; Bracket</h1>
+      <p class="text-slate-400 text-sm mt-1">Group fixtures now · Knockout when stage starts</p>
     </div>
 
     <section>
-      <h2 class="font-bold text-lg mb-4">⚽ Futsal</h2>
-      <div id="bracketFutsal" class="bracket-scroll"><p class="text-slate-400 text-sm">Loading…</p></div>
+      <h2 class="font-bold text-lg mb-1">⚽ Futsal fixtures</h2>
+      <p class="text-xs text-slate-500 mb-4">Official order · scores update live</p>
+      <div id="futsalList"><p class="text-slate-400 text-sm">Loading…</p></div>
     </section>
 
     <section>
-      <h2 class="font-bold text-lg mb-4">🏸 Badminton</h2>
-      <div id="bracketBm" class="bracket-scroll"><p class="text-slate-400 text-sm">Loading…</p></div>
+      <h2 class="font-bold text-lg mb-1">⚽ Futsal knockout</h2>
+      <p class="text-xs text-slate-500 mb-4">QF · SF · Final (set group name in admin to QF/SF/Final)</p>
+      <div id="bracketFutsal" class="bracket-scroll"><p class="text-slate-400 text-sm">Knockout not started yet.</p></div>
+    </section>
+
+    <section>
+      <h2 class="font-bold text-lg mb-1">🏸 Badminton</h2>
+      <p class="text-xs text-slate-500 mb-4">Knock-out draw · add matches in admin</p>
+      <div id="bracketBm"><p class="text-slate-400 text-sm">No badminton matches yet.</p></div>
     </section>
   </main>
 
@@ -51,33 +82,48 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <div class="footer-content">
         <div class="footer-credit-block"><span class="footer-label">Created by</span><strong class="footer-name">Jatin Narula</strong></div>
-        <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports & Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
+        <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports &amp; Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
       </div>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
+  <script src="js/mobile-nav.js"></script>
+  <script src="js/announce.js"></script>
+  <script src="js/pwa-register.js"></script>
   <script>
     var sb = window.supabaseClient;
 
     function stageOf(text) {
       var t = (text || '').toUpperCase();
-      if (t.indexOf('FINAL') >= 0 && t.indexOf('SEMI') < 0) return 'Final';
+      if (t.indexOf('FINAL') >= 0 && t.indexOf('SEMI') < 0 && t.indexOf('QF') < 0) return 'Final';
       if (t.indexOf('SF') >= 0 || t.indexOf('SEMI') >= 0) return 'Semi-finals';
       if (t.indexOf('QF') >= 0 || t.indexOf('QUARTER') >= 0) return 'Quarter-finals';
       return null;
     }
 
+    function statusCls(s) {
+      if (s === 'live' || s === 'half_time' || s === 'penalties') return 'live';
+      if (s === 'finished' || s === 'walkover') return 'done';
+      return 'up';
+    }
+    function statusLabel(s) {
+      if (s === 'live' || s === 'half_time' || s === 'penalties') return 'LIVE';
+      if (s === 'finished' || s === 'walkover') return 'FT';
+      return 'UP';
+    }
+
     function card(html, status) {
       var cls = 'bracket-card';
-      if (status === 'live' || status === 'half_time') cls += ' live';
+      if (status === 'live' || status === 'half_time' || status === 'penalties') cls += ' live';
       if (status === 'finished' || status === 'walkover') cls += ' done';
       return '<div class="' + cls + '">' + html + '</div>';
     }
 
     function renderRounds(elId, matches, renderOne) {
       var el = document.getElementById(elId);
+      if (!el) return;
       var order = ['Quarter-finals', 'Semi-finals', 'Final'];
       var by = {};
       matches.forEach(function (m) {
@@ -93,91 +139,73 @@
           list.map(function (m) { return card(renderOne(m), m.status); }).join('') +
           '</div>';
       }).join('');
-      el.innerHTML = html || '<p class="text-slate-400 text-sm">Knockout matches will appear here once the stage begins.</p>';
-    }
-
-    var DEMO_FUTSAL = [
-      { stage: 'QF', group_name: 'QF 1', status: 'finished', home: 'Law Lions', away: 'Code Crushers', home_score: 4, away_score: 2 },
-      { stage: 'QF', group_name: 'QF 2', status: 'finished', home: 'Statute FC', away: 'Bailiff Ballers', home_score: 1, away_score: 3 },
-      { stage: 'QF', group_name: 'QF 3', status: 'finished', home: 'Moot Masters', away: 'Gavel United', home_score: 5, away_score: 5 },
-      { stage: 'QF', group_name: 'QF 4', status: 'finished', home: 'Section 11', away: 'Lex FC', home_score: 2, away_score: 0 },
-      { stage: 'SF', group_name: 'SF 1', status: 'live', home: 'Law Lions', away: 'Bailiff Ballers', home_score: 2, away_score: 2 },
-      { stage: 'SF', group_name: 'SF 2', status: 'not_started', home: 'Moot Masters', away: 'Section 11', home_score: 0, away_score: 0 },
-      { stage: 'Final', group_name: 'Final', status: 'not_started', home: 'TBD', away: 'TBD', home_score: 0, away_score: 0 }
-    ];
-
-    var DEMO_BM = [
-      { category: 'QF · MS', status: 'finished', player1: 'Aarav Sharma', player2: 'Rohan Patel', games_p1: 2, games_p2: 0 },
-      { category: 'QF · MS', status: 'finished', player1: 'Vikram Singh', player2: 'Kabir Mehta', games_p1: 2, games_p2: 1 },
-      { category: 'SF · MS', status: 'live', player1: 'Aarav Sharma', player2: 'Vikram Singh', games_p1: 1, games_p2: 1 },
-      { category: 'Final · MS', status: 'not_started', player1: 'TBD', player2: 'TBD', games_p1: 0, games_p2: 0 },
-      { category: 'SF · WS', status: 'finished', player1: 'Priya Mehta', player2: 'Ananya Singh', games_p1: 2, games_p2: 1 },
-      { category: 'Final · WS', status: 'not_started', player1: 'Priya Mehta', player2: 'TBD', games_p1: 0, games_p2: 0 }
-    ];
-
-    function showDemo() {
-      renderRounds('bracketFutsal', DEMO_FUTSAL, function (m) {
-        return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + '</div>' +
-          '<div class="font-semibold text-sm">' + m.home + ' <span class="text-slate-400">' + m.home_score + '</span></div>' +
-          '<div class="font-semibold text-sm">' + m.away + ' <span class="text-slate-400">' + m.away_score + '</span></div>';
-      });
-      renderRounds('bracketBm', DEMO_BM, function (m) {
-        return '<div class="text-xs text-slate-500 mb-1">' + (m.category || '') + '</div>' +
-          '<div class="font-semibold text-sm">' + m.player1 + ' <span class="text-slate-400">' + m.games_p1 + '</span></div>' +
-          '<div class="font-semibold text-sm">' + m.player2 + ' <span class="text-slate-400">' + m.games_p2 + '</span></div>';
-      });
+      el.innerHTML = html || '<p class="text-slate-400 text-sm">Knockout not started yet.</p>';
     }
 
     async function load() {
-      if (!sb || typeof sb.from !== 'function') {
-        showDemo();
-        return;
-      }
+      if (!sb || typeof sb.from !== 'function') return;
       var teams = {};
       try {
         var tr = await sb.from('teams').select('*');
         (tr.data || []).forEach(function (t) { teams[t.id] = t.name; });
       } catch (e) {}
 
-      var fr = await sb.from('matches').select('*');
-      var fm = (fr.data || []).filter(function (m) { return stageOf(m.group_name); });
+      var fr = await sb.from('matches').select('*').order('kickoff_time', { ascending: true });
+      var all = fr.data || [];
+      var group = all.filter(function (m) { return !stageOf(m.group_name); });
+      var ko = all.filter(function (m) { return stageOf(m.group_name); });
 
-      var br = await sb.from('badminton_matches').select('*');
-      var bm = (br.data || []).filter(function (m) { return stageOf(m.category); });
-
-      if (!fm.length && !bm.length) {
-        showDemo();
-        return;
+      var listEl = document.getElementById('futsalList');
+      if (listEl) {
+        if (!group.length && !all.length) {
+          listEl.innerHTML = '<p class="text-slate-400 text-sm">No fixtures yet.</p>';
+        } else {
+          var rows = (group.length ? group : all);
+          listEl.innerHTML = rows.map(function (m, i) {
+            var h = teams[m.home_team_id] || 'TBD';
+            var a = teams[m.away_team_id] || 'TBD';
+            var hs = Number(m.home_score) || 0;
+            var as = Number(m.away_score) || 0;
+            var showScore = m.status !== 'not_started';
+            return '<div class="fx-row">' +
+              '<span class="fx-num">' + (i + 1) + '</span>' +
+              '<div class="fx-teams"><strong>' + h + '</strong><span class="fx-vs">VS</span><strong>' + a + '</strong></div>' +
+              (showScore ? '<span class="fx-score">' + hs + '&ndash;' + as + '</span>' : '') +
+              '<span class="fx-status ' + statusCls(m.status) + '">' + statusLabel(m.status) + '</span>' +
+              '</div>';
+          }).join('');
+        }
       }
 
-      if (fm.length) {
-        renderRounds('bracketFutsal', fm, function (m) {
-          var h = teams[m.home_team_id] || 'TBD';
-          var a = teams[m.away_team_id] || 'TBD';
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + '</div>' +
-            '<div class="font-semibold text-sm">' + h + ' <span class="text-slate-400">' + (m.home_score ?? 0) + '</span></div>' +
-            '<div class="font-semibold text-sm">' + a + ' <span class="text-slate-400">' + (m.away_score ?? 0) + '</span></div>';
-        });
-      } else {
-        renderRounds('bracketFutsal', DEMO_FUTSAL, function (m) {
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + '</div>' +
-            '<div class="font-semibold text-sm">' + m.home + ' <span class="text-slate-400">' + m.home_score + '</span></div>' +
-            '<div class="font-semibold text-sm">' + m.away + ' <span class="text-slate-400">' + m.away_score + '</span></div>';
-        });
-      }
+      renderRounds('bracketFutsal', ko, function (m) {
+        var h = teams[m.home_team_id] || 'TBD';
+        var a = teams[m.away_team_id] || 'TBD';
+        return '<div class="text-xs text-slate-500 mb-1">' + (m.group_name || '') + '</div>' +
+          '<div class="font-semibold text-sm">' + h + ' <span class="text-slate-400">' + (m.home_score ?? 0) + '</span></div>' +
+          '<div class="font-semibold text-sm">' + a + ' <span class="text-slate-400">' + (m.away_score ?? 0) + '</span></div>';
+      });
 
-      if (bm.length) {
-        renderRounds('bracketBm', bm, function (m) {
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.category || '') + '</div>' +
-            '<div class="font-semibold text-sm">' + (m.player1 || 'TBD') + ' <span class="text-slate-400">' + (m.games_p1 || 0) + '</span></div>' +
-            '<div class="font-semibold text-sm">' + (m.player2 || 'TBD') + ' <span class="text-slate-400">' + (m.games_p2 || 0) + '</span></div>';
-        });
-      } else {
-        renderRounds('bracketBm', DEMO_BM, function (m) {
-          return '<div class="text-xs text-slate-500 mb-1">' + (m.category || '') + '</div>' +
-            '<div class="font-semibold text-sm">' + m.player1 + ' <span class="text-slate-400">' + m.games_p1 + '</span></div>' +
-            '<div class="font-semibold text-sm">' + m.player2 + ' <span class="text-slate-400">' + m.games_p2 + '</span></div>';
-        });
+      var br = await sb.from('badminton_matches').select('*').order('created_at', { ascending: true });
+      var bm = br.data || [];
+      var bmEl = document.getElementById('bracketBm');
+      if (bmEl) {
+        if (!bm.length) {
+          bmEl.innerHTML = '<p class="text-slate-400 text-sm">No badminton matches yet — add from admin.</p>';
+        } else {
+          bmEl.innerHTML = bm.map(function (m, i) {
+            var p1 = Number(m.g1_p1) || 0;
+            var p2 = Number(m.g1_p2) || 0;
+            var showScore = m.status !== 'not_started';
+            return '<div class="fx-row">' +
+              '<span class="fx-num">' + (i + 1) + '</span>' +
+              '<div class="fx-teams"><strong>' + (m.player1 || 'TBD') + '</strong><span class="fx-vs">VS</span><strong>' + (m.player2 || 'TBD') + '</strong>' +
+              (m.category ? '<div class="text-[11px] text-slate-500 mt-0.5">' + m.category + '</div>' : '') +
+              '</div>' +
+              (showScore ? '<span class="fx-score">' + p1 + '&ndash;' + p2 + '</span>' : '') +
+              '<span class="fx-status ' + statusCls(m.status) + '">' + statusLabel(m.status) + '</span>' +
+              '</div>';
+          }).join('');
+        }
       }
     }
 
