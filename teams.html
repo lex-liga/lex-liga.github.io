@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teams – Lex Liga 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/extras.css" />
   <link rel="manifest" href="manifest.json" />
   <style>
-    /* Single-column hero — no empty second cell */
-    .hero-content { display: block !important; }
     .team-card {
       background: rgba(15,23,42,0.85);
       border: 1px solid rgba(148,163,184,0.15);
@@ -31,60 +29,90 @@
       font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em;
       text-transform: uppercase; color: #4ade80; margin: 1.75rem 0 0.85rem;
     }
-    .cat-title:first-of-type { margin-top: 0.5rem; }
   </style>
 </head>
 <body class="min-h-screen">
-  <header class="site-header sticky top-0 z-50"></header>
+  <header class="site-header sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
+      <div class="flex items-center justify-between gap-3">
+        <a href="index.html" class="site-wordmark">LEX <span>LIGA</span></a>
+        <nav class="site-nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <div class="sport-tabs">
+            <a href="futsal.html" class="sport-tab"><span>⚽</span> Futsal</a>
+            <a href="badminton.html" class="sport-tab"><span>🏸</span> Badminton</a>
+          </div>
+          <a href="teams.html" class="nav-link is-active" aria-current="page">Teams</a>
+          <a href="bracket.html" class="nav-link">Bracket</a>
+          <a href="photos.html" class="nav-link">Photos</a>
+          <a href="fixtures.html" class="nav-link">Fixtures</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-  <section class="hero-shell hero-shell-compact">
+  <section class="hero-shell">
     <div class="hero-grid"></div>
     <div class="hero-glow hero-glow-one"></div>
+    <div class="hero-glow hero-glow-two"></div>
+    <div class="hero-red-glow"></div>
     <div class="hero-content max-w-6xl mx-auto px-4 sm:px-6">
       <div class="hero-copy">
         <div class="hero-kicker"><span class="hero-live-dot"></span> ROSTERS · 2026</div>
-        <h1>TEAMS</h1>
-        <p class="hero-title">WHO'S PLAYING</p>
+        <h1>LEX <span>LIGA</span></h1>
+        <p class="hero-title">TEAMS &amp; ENTRIES</p>
         <div class="hero-divider"></div>
         <div class="hero-meta"><span>FUTSAL</span><span>•</span><span>BADMINTON</span></div>
+      </div>
+      <div class="hero-artwork">
+        <div class="hero-artwork-frame"></div>
+        <img src="assets/lexliga_logo_transparent.png" alt="Lex Liga" class="lexliga-logo-art" />
       </div>
     </div>
   </section>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10 pb-24">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
     <section>
-      <p class="section-eyebrow">⚽ FUTSAL</p>
-      <h2 class="text-2xl font-extrabold mb-4">Men's Teams</h2>
+      <div class="section-heading-row">
+        <div><p class="section-eyebrow">⚽ FUTSAL</p><h2>Men's Teams</h2></div>
+      </div>
       <div class="grid sm:grid-cols-2 gap-4" id="futsalMen"></div>
       <p class="cat-title">Women's Squad</p>
       <div class="team-card" id="futsalWomen"></div>
     </section>
 
     <section>
-      <p class="section-eyebrow">🏸 BADMINTON</p>
-      <h2 class="text-2xl font-extrabold mb-2">Entries</h2>
+      <div class="section-heading-row">
+        <div><p class="section-eyebrow">🏸 BADMINTON</p><h2>Entries</h2></div>
+      </div>
       <p class="text-sm text-slate-400 mb-4">Knock-out from round 1 · categories as registered</p>
       <div id="bmEntries"></div>
     </section>
   </main>
 
+  <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="floating-social" aria-label="Follow SACC on Instagram">
+    <span class="floating-social-icon">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg>
+    </span>
+    <span class="floating-social-text"><small>FOLLOW SACC</small><strong>Instagram ↗</strong></span>
+  </a>
+
   <footer class="site-footer">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <div class="footer-content">
-        <div class="footer-credit-block">
-          <span class="footer-label">Created by</span>
-          <strong class="footer-name">Jatin Narula</strong>
-        </div>
-        <div class="footer-credit-block">
-          <span class="footer-label">Managed by</span>
-          <strong class="footer-name">Sports & Cultural Committee</strong>
-          <span class="footer-subtext">(SACC), SLFJPS, NFSU</span>
-        </div>
+        <div class="footer-credit-block"><span class="footer-label">Created by</span><strong class="footer-name">Jatin Narula</strong></div>
+        <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports &amp; Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
+        <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="instagram-card">
+          <div class="instagram-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg></div>
+          <div class="instagram-copy"><span class="instagram-label">Follow SACC</span><span class="instagram-handle">@sacc_.official</span></div>
+          <span class="instagram-arrow">↗</span>
+        </a>
       </div>
     </div>
   </footer>
-  <script src="js/mobile-nav.js"></script>
+
   <script src="js/teams-data.js"></script>
+  <script src="js/announce.js"></script>
   <script src="js/pwa-register.js"></script>
 </body>
 </html>
