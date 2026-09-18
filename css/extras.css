@@ -1,8 +1,376 @@
-/* Lex Liga extras – restore + HT badge */
+/* ===== Uniform nav active state ===== */
+.site-nav .nav-link.is-active {
+  color: #4ade80 !important;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+/* ===== Mobile hamburger nav ===== */
+.nav-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.nav-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+.nav-drawer.open { display: block; }
+.nav-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(82vw, 300px);
+  height: 100%;
+  background: #0f172a;
+  border-left: 1px solid rgba(148, 163, 184, 0.15);
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.4);
+}
+.nav-drawer-panel a {
+  display: block;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.nav-drawer-panel a:hover,
+.nav-drawer-panel a.is-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+.nav-drawer-close {
+  align-self: flex-end;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: transparent;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .site-nav > .nav-link,
+  .site-nav > .sport-tabs {
+    display: none !important;
+  }
+  .nav-burger {
+    display: inline-flex !important;
+  }
+  .site-wordmark {
+    display: inline-block !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .nav-burger { display: none !important; }
+  .nav-drawer { display: none !important; }
+}
+
+/* ===== Announcement marquee ===== */
+.announce-bar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  overflow: hidden;
+  width: 100%;
+  background: linear-gradient(90deg, #14532d, #166534, #14532d);
+  border-bottom: 1px solid rgba(74, 222, 128, 0.35);
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+.announce-track {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  white-space: nowrap;
+  will-change: transform;
+  animation: announce-scroll 22s linear infinite;
+}
+.announce-text {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  min-width: 100vw;
+  box-sizing: border-box;
+  padding: 0 3rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ecfdf5;
+  line-height: 1;
+  flex-shrink: 0;
+}
+@keyframes announce-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+body.has-announce .site-header {
+  top: 38px;
+}
+
+/* Sound / notify */
+.lex-extras-controls {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 5.5rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.lex-extra-btn {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.92);
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.lex-extra-btn.is-on {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(22, 101, 52, 0.35);
+}
+
+.pwa-install-banner {
+  display: none !important;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+}
+.share-button:hover {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.social-post-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+  width: 100% !important;
+}
+@media (min-width: 640px) {
+  .social-post-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+.social-post-grid > .social-post {
+  width: 100% !important;
+  min-height: 240px;
+  box-sizing: border-box;
+}
+
+.playlist-section {
+  border-radius: 1.25rem;
+  padding: 1.35rem 1.25rem 1.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background:
+    radial-gradient(ellipse 70% 80% at 0% 0%, rgba(34, 197, 94, 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgba(29, 185, 84, 0.08), transparent 50%),
+    rgba(15, 23, 42, 0.85);
+}
+.playlist-section .section-eyebrow { margin-bottom: 0.25rem; }
+.playlist-section h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+.playlist-section .playlist-desc {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+.playlist-embed {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+.playlist-embed iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+}
+.playlist-note {
+  margin-top: 0.65rem;
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.sport-wm {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+}
+.sport-wm-inner {
+  position: absolute;
+  inset: -10% -18%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: clamp(0.35rem, 1.8vw, 1rem);
+  transform: rotate(-12deg);
+}
+.sport-wm-row {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(2.5rem, 10vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.09);
+  background: none;
+  -webkit-text-fill-color: rgba(148, 163, 184, 0.09);
+}
+.sport-wm-row:nth-child(odd) {
+  transform: translateX(-6%);
+  color: rgba(34, 197, 94, 0.1);
+  -webkit-text-fill-color: rgba(34, 197, 94, 0.1);
+}
+.sport-wm-row:nth-child(even) {
+  transform: translateX(8%);
+}
+.sport-wm-row:nth-child(3n) {
+  transform: translateX(-12%);
+  color: rgba(56, 189, 248, 0.08);
+  -webkit-text-fill-color: rgba(56, 189, 248, 0.08);
+}
+.sport-wm-row:nth-child(4n) {
+  transform: translateX(14%);
+}
+
+body.has-sport-wm .hero-shell,
+body.has-sport-wm main,
+body.has-sport-wm .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.pwa-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+}
+.pwa-prompt-card {
+  position: relative;
+  width: min(100%, 380px);
+  padding: 1.75rem 1.5rem 1.35rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(160deg, #0f172a, #1e293b);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+.pwa-prompt-x {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pwa-prompt-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+.pwa-prompt-card h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 0.5rem;
+}
+.pwa-prompt-body {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0 0 1.25rem;
+}
+.pwa-prompt-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pwa-prompt-primary {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  font-weight: 800;
+  font-size: 0.875rem;
+  background: #22c55e;
+  color: #0f172a;
+  cursor: pointer;
+}
+.pwa-prompt-secondary {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
 
 /* Half-time badge on live cards */
-.status-half_time,
-.status-badge.status-half_time {
+.status-half_time, .status-badge.status-half_time {
   background: #f97316 !important;
   color: #fff !important;
 }
