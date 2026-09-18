@@ -16,8 +16,20 @@
     return '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full ' + pair[1] + '">' + pair[0] + '</span>';
   }
 
-  function setAddVisible(show) {
+  function findFutsalAddBox() {
     var box = document.getElementById('futsalAddBox');
+    if (box) return box;
+    var panel = document.getElementById('adminPanelFutsal');
+    if (!panel) return null;
+    var found = null;
+    panel.querySelectorAll('.bg-slate-800').forEach(function (c) {
+      if (c.querySelector('#addMatchBtn')) found = c;
+    });
+    return found;
+  }
+
+  function setAddVisible(show) {
+    var box = findFutsalAddBox();
     if (box) box.classList.toggle('hidden', !show);
     var title = document.getElementById('futsalListTitle');
     if (title) title.textContent = selectedMatchId ? 'Control match' : 'Matches';
@@ -56,7 +68,6 @@
       '<div class="text-[11px] text-green-400 text-center mt-1">Open controls</div></button>';
   }
 
-  var _orig = window.loadAdminData;
   window.loadAdminData = async function () {
     var container = document.getElementById('adminMatches');
     if (!container) return;
@@ -69,9 +80,6 @@
       return;
     }
     try {
-      if (typeof _orig === 'function') {
-        // Use original data loading by temporarily replacing container fill
-      }
       var teamsRes = await sb.from('teams').select('*').order('name');
       if (teamsRes.error) throw teamsRes.error;
       if (typeof allTeams !== 'undefined') allTeams = teamsRes.data || [];
@@ -137,4 +145,10 @@
       container.innerHTML = '<p class="text-red-400 text-sm text-center">Error: ' + (err.message || err) + '</p>';
     }
   };
+
+  // If futsal panel already open, refresh list UI
+  setTimeout(function () {
+    if (!document.getElementById('adminPanelFutsal') || document.getElementById('adminPanelFutsal').classList.contains('hidden')) return;
+    if (typeof window.loadAdminData === 'function') window.loadAdminData();
+  }, 300);
 })();
