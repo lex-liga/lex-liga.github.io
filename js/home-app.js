@@ -1,88 +1,61 @@
-// Lex Liga Home – Event Centre (dark only)
-const sb = window.supabaseClient || window.supabase || supabase;
+// Lex Liga home – live across sports
+const sb = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
 
-function forceDark() {
-  document.documentElement.classList.add('dark');
-  document.body.classList.remove('light');
-  localStorage.setItem('theme', 'dark');
-}
-
-async function loadHome() {
-  if (!sb || typeof sb.from !== 'function') {
-    setText('homeLive', '<p class="empty-state">Supabase not ready. Refresh the page.</p>');
-    return;
-  }
-
-  let futsalLive = [], futsalAll = [], bmLive = [], bmAll = [], teams = [];
-
-  try {
-    const [matchesRes, teamsRes, bmRes] = await Promise.all([
-      sb.from('matches').select('*'),
-      sb.from('teams').select('*'),
-      sb.from('badminton_matches').select('*')
-    ]);
-    teams = teamsRes.data || [];
-    futsalAll = matchesRes.data || [];
-    bmAll = bmRes.data || [];
-    futsalLive = futsalAll.filter(m => m.status === 'live' || m.status === 'half_time' || m.status === 'penalties');
-    bmLive = bmAll.filter(m => m.status === 'live');
-  } catch (err) {
-    console.error(err);
-  }
-
-  const liveHtml = [];
-  futsalLive.forEach(m => liveHtml.push(renderFutsalLive(m, teams)));
-  bmLive.forEach(m => liveHtml.push(renderBmLive(m)));
-
-  const liveEl = document.getElementById('homeLive');
-  if (liveEl) {
-    liveEl.innerHTML = liveHtml.length
-      ? liveHtml.join('')
-      : '<p class="empty-state">No live matches right now. Check back during match times.</p>';
-  }
-
-  if (typeof window.lexWatchScores === 'function') {
-    const watch = [];
-    futsalLive.forEach(m => {
-      const home = teamName(teams, m.home_team_id);
-      const away = teamName(teams, m.away_team_id);
-      watch.push({
-        id: 'f-' + m.id,
-        label: 'Futsal live: ' + home + ' vs ' + away,
-        scoreKey: String(m.home_score) + '-' + String(m.away_score) + '-p' + String(m.pen_home || 0) + '-' + String(m.pen_away || 0),
-        isLive: true
-      });
-    });
-    bmLive.forEach(m => {
-      const cg = m.current_game || 1;
-      watch.push({
-        id: 'b-' + m.id,
-        label: 'Badminton live: ' + (m.player1 || '') + ' vs ' + (m.player2 || ''),
-        scoreKey: String(m['g' + cg + '_p1']) + '-' + String(m['g' + cg + '_p2']) + '-' + cg,
-        isLive: true
-      });
-    });
-    window.lexWatchScores(watch);
-  }
-
-  const liveCount = futsalLive.length + bmLive.length;
-  const futsalFinished = futsalAll.filter(m => m.status === 'finished' || m.status === 'walkover').length;
-  const bmFinished = bmAll.filter(m => m.status === 'finished').length;
-
-  setText('statLive', String(liveCount));
-  setText('statFutsal', String(futsalAll.length));
-  setText('statBadminton', String(bmAll.length));
-  setText('statDone', String(futsalFinished + bmFinished));
-  setText('badgeFutsalLive', futsalLive.length ? futsalLive.length + ' LIVE' : 'View');
-  setText('badgeBmLive', bmLive.length ? bmLive.length + ' LIVE' : 'View');
-
-  const up = document.getElementById('lastUpdated');
-  if (up) up.textContent = 'Updated ' + new Date().toLocaleTimeString();
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
 }
 
 function teamName(teams, id) {
-  const t = teams.find(x => x.id === id);
+  const t = (teams || []).find(x => x.id === id);
   return t ? t.name : 'TBD';
+}
+
+async function loadHome() {
+  const liveEl = document.getElementById('homeLive');
+  const updated = document.getElementById('lastUpdated');
+  if (updated) updated.textContent = 'Updating…';
+  if (!sb || typeof sb.from !== 'function') {
+    if (liveEl) liveEl.innerHTML = '<p class="empty-state">Supabase not ready</p>';
+    return;
+  }
+  try {
+    const [teamsRes, futsalRes, bmRes] = await Promise.all([
+      sb.from('teams').select('*'),
+      sb.from('matches').select('*').order('kickoff_time', { ascending: true }),
+      sb.from('badminton_matches').select('*').order('created_at', { ascending: true })
+    ]);
+    const teams = teamsRes.data || [];
+    const futsalAll = futsalRes.data || [];
+    const bmAll = bmRes.data || [];
+
+    const futsalLive = futsalAll.filter(m => m.status === 'live' || m.status === 'half_time' || m.status === 'penalties');
+    const bmLive = bmAll.filter(m => m.status === 'live');
+
+    // Snapshot stats
+    const futsalFinished = futsalAll.filter(m => m.status === 'finished' || m.status === 'walkover').length;
+    const bmFinished = bmAll.filter(m => m.status === 'finished').length;
+    setText('statLive', String(futsalLive.length + bmLive.length));
+    setText('statFutsal', String(futsalAll.length));
+    setText('statBadminton', String(bmAll.length));
+    setText('statDone', String(futsalFinished + bmFinished));
+    setText('badgeFutsalLive', futsalLive.length ? futsalLive.length + ' LIVE' : 'View');
+    setText('badgeBmLive', bmLive.length ? bmLive.length + ' LIVE' : 'View');
+
+    const cards = [];
+    futsalLive.forEach(m => cards.push(renderFutsalLive(m, teams)));
+    bmLive.forEach(m => cards.push(renderBmLive(m)));
+
+    if (liveEl) {
+      liveEl.innerHTML = cards.length
+        ? cards.join('')
+        : '<p class="empty-state">No live matches right now</p>';
+    }
+    if (updated) updated.textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    console.error(e);
+    if (liveEl) liveEl.innerHTML = '<p class="text-red-400 text-sm">' + (e.message || e) + '</p>';
+  }
 }
 
 function renderFutsalLive(m, teams) {
@@ -91,7 +64,7 @@ function renderFutsalLive(m, teams) {
   const pens = (m.pens_on || m.status === 'penalties' || m.pen_home || m.pen_away)
     ? ` · Pens ${(m.pen_home ?? 0)}–${(m.pen_away ?? 0)}`
     : '';
-  const label = m.status === 'penalties' ? '⚽ Futsal · PENS' : '⚽ Futsal · LIVE';
+  const label = m.status === 'penalties' ? '⚽ Futsal · PENS' : (m.status === 'half_time' ? '⚽ Futsal · HT' : '⚽ Futsal · LIVE');
   return `
     <a href="futsal.html" class="home-live-card home-live-futsal">
       <div class="home-live-sport">${label}</div>
@@ -119,14 +92,6 @@ function renderBmLive(m) {
     </a>`;
 }
 
-function setText(id, html) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = html;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  forceDark();
-  loadHome();
-  setInterval(loadHome, 15000);
-  document.getElementById('refreshBtn')?.addEventListener('click', loadHome);
-});
+document.getElementById('refreshBtn')?.addEventListener('click', loadHome);
+loadHome();
+setInterval(loadHome, 15000);
