@@ -3,57 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Badminton – Lex Liga 2026</title>
-  <meta name="description" content="Live badminton scores for Lex Liga." />
+  <title>Badminton — Lex Liga Live Scores</title>
+  <meta name="description" content="Live badminton scores, results and fixtures for Lex Liga." />
+  <meta name="theme-color" content="#0b1120" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: { DEFAULT: '#22c55e' } } } } }</script>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/extras.css" />
   <link rel="manifest" href="manifest.json" />
+  <style>
+    .bm-hero-art {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 340px;
+    }
+    .bm-hero-art img {
+      width: min(88vw, 480px);
+      height: auto;
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.45));
+      animation: bm-float 5.5s ease-in-out infinite;
+    }
+    @keyframes bm-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+  </style>
 </head>
 <body class="min-h-screen">
-  <header class="site-header sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
-      <div class="flex items-center justify-between gap-3">
-        <a href="index.html" class="site-wordmark">LEX <span>LIGA</span></a>
-        <nav class="site-nav">
-          <a href="index.html" class="nav-link">Home</a>
-          <div class="sport-tabs">
-            <a href="futsal.html" class="sport-tab"><span>⚽</span> Futsal</a>
-            <a href="badminton.html" class="sport-tab is-active" aria-current="page"><span>🏸</span> Badminton</a>
-          </div>
-          <a href="teams.html" class="nav-link">Teams</a>
-          <a href="bracket.html" class="nav-link">Bracket</a>
-          <a href="photos.html" class="nav-link">Photos</a>
-          <a href="fixtures.html" class="nav-link">Fixtures</a>
-        </nav>
-      </div>
-    </div>
-  </header>
 
-  <section class="hero-shell">
+  <header class="site-header sticky top-0 z-50"></header>
+
+  <section class="hero-shell hero-shell-compact">
     <div class="hero-grid"></div>
     <div class="hero-glow hero-glow-one"></div>
-    <div class="hero-glow hero-glow-two"></div>
-    <div class="hero-red-glow"></div>
     <div class="hero-content max-w-6xl mx-auto px-4 sm:px-6">
       <div class="hero-copy">
         <div class="hero-kicker"><span class="hero-live-dot"></span> COLLEGE BADMINTON • 2026</div>
-        <h1>LEX <span>LIGA</span></h1>
-        <p class="hero-title">BADMINTON CHAMPIONSHIP</p>
+        <h1>BAD<span>MINTON</span></h1>
+        <p class="hero-title">LIVE SCORES</p>
         <div class="hero-divider"></div>
-        <div class="hero-meta"><span>LIVE SCORES</span><span>•</span><span>KNOCKOUT</span><span>•</span><span>19–20 SEP</span></div>
+        <div class="hero-meta"><span>KNOCKOUT</span><span>•</span><span>19–20 SEP</span><span>•</span><span>SPORTS ARENA</span></div>
       </div>
-      <div class="hero-artwork">
-        <div class="hero-artwork-frame"></div>
-        <img src="assets/lexliga_logo_transparent.png" alt="Lex Liga" class="lexliga-logo-art" />
+      <div class="bm-hero-art" aria-hidden="true">
+        <img src="assets/badminton-hero.png" alt="Badminton player jump smash" width="480" height="520" loading="eager" />
       </div>
     </div>
   </section>
 
   <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
     <div class="update-bar">
-      <div class="update-status"><span class="status-pulse"></span><span id="lastUpdated">Loading live data...</span></div>
+      <div class="update-status"><span class="status-pulse"></span><span id="lastUpdated">Loading...</span></div>
       <button id="refreshBtn" class="refresh-button" type="button">↻ Refresh</button>
     </div>
 
@@ -74,9 +77,9 @@
 
     <section>
       <div class="section-heading-row">
-        <div><p class="section-eyebrow">DRAW</p><h2>All Matches</h2></div>
+        <div><p class="section-eyebrow">SCHEDULE</p><h2>All Matches</h2></div>
       </div>
-      <div id="bmAll" class="space-y-3"><p class="empty-state">No fixtures yet — add from Badminton admin</p></div>
+      <div id="bmAll" class="space-y-4"><p class="empty-state">No fixtures yet — add from Badminton admin</p></div>
     </section>
 
     <section class="info-section rounded-2xl p-5 sm:p-6">
@@ -97,32 +100,28 @@
     </section>
   </main>
 
-  <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="floating-social" aria-label="Follow SACC on Instagram">
-    <span class="floating-social-icon">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg>
-    </span>
-    <span class="floating-social-text"><small>FOLLOW SACC</small><strong>Instagram ↗</strong></span>
-  </a>
-
   <footer class="site-footer">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <div class="footer-content">
-        <div class="footer-credit-block"><span class="footer-label">Created by</span><strong class="footer-name">Jatin Narula</strong></div>
-        <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports &amp; Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
-        <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="instagram-card">
-          <div class="instagram-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg></div>
-          <div class="instagram-copy"><span class="instagram-label">Follow SACC</span><span class="instagram-handle">@sacc_.official</span></div>
-          <span class="instagram-arrow">↗</span>
-        </a>
+        <div class="footer-credit-block">
+          <span class="footer-label">Created by</span>
+          <strong class="footer-name">Jatin Narula</strong>
+        </div>
+        <div class="footer-credit-block">
+          <span class="footer-label">Managed by</span>
+          <strong class="footer-name">Sports &amp; Cultural Committee</strong>
+          <span class="footer-subtext">(SACC), SLFJPS, NFSU</span>
+        </div>
       </div>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
-  <script src="js/badminton-app.js"></script>
+  <script src="js/mobile-nav.js"></script>
   <script src="js/announce.js"></script>
   <script src="js/live-extras.js"></script>
   <script src="js/pwa-register.js"></script>
+  <script src="js/badminton-app.js"></script>
 </body>
 </html>
