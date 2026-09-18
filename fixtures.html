@@ -3,715 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Fixtures & Standings — Lex Liga Futsal</title>
-
-  <meta
-    name="description"
-    content="Fixtures, live scores, standings and tournament information for Lex Liga Futsal."
-  />
-
+  <title>Fixtures & Standings — Lex Liga</title>
+  <meta name="description" content="Fixtures, standings and official rulebooks for Lex Liga." />
   <meta name="theme-color" content="#0b1120" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  >
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              DEFAULT: '#22c55e',
-              dark: '#16a34a'
-            }
-          }
-        }
-      }
-    };
-  </script>
-
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/extras.css" />
+  <link rel="manifest" href="manifest.json" />
 </head>
-
 <body class="min-h-screen">
-
-  <!-- HEADER -->
-
-  <header class="site-header sticky top-0 z-50">
-
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
-
-      <div class="flex items-center justify-between gap-3">
-
-        <a href="index.html" class="site-wordmark" aria-label="Lex Liga home">
-          LEX <span>LIGA</span>
-        </a>
-
-        <nav class="site-nav" aria-label="Main navigation">
-
-          <div class="sport-tabs" aria-label="Choose a sport">
-            <a href="index.html" class="sport-tab is-active">
-              <span aria-hidden="true">⚽</span> Futsal
-            </a>
-
-            <a href="badminton.html" class="sport-tab">
-              <span aria-hidden="true">🏸</span> Badminton
-            </a>
-          </div>
-
-          <a
-            href="index.html"
-            class="nav-link"
-          >
-            Live
-          </a>
-
-          <button
-            id="themeToggle"
-            class="theme-toggle"
-            aria-label="Toggle theme"
-            type="button"
-          >
-            ☀️
-          </button>
-
-        </nav>
-
-      </div>
-
-    </div>
-
-  </header>
-
-
-  <!-- HERO -->
+  <header class="site-header sticky top-0 z-50"></header>
 
   <section class="hero-shell hero-shell-compact">
-
     <div class="hero-grid"></div>
-
     <div class="hero-glow hero-glow-one"></div>
-
-    <div class="hero-glow hero-glow-two"></div>
-
     <div class="hero-content max-w-6xl mx-auto px-4 sm:px-6">
-
       <div class="hero-copy">
-
-        <div class="hero-kicker">
-          <span class="hero-live-dot"></span>
-          TOURNAMENT CENTRE
-        </div>
-
-
-        <h1>
-          LEX <span>LIGA</span>
-        </h1>
-
-
-        <p class="hero-title">
-          FIXTURES &amp; STANDINGS
-        </p>
-
-
+        <div class="hero-kicker"><span class="hero-live-dot"></span> TOURNAMENT CENTRE</div>
+        <h1>LEX <span>LIGA</span></h1>
+        <p class="hero-title">FIXTURES & STANDINGS</p>
         <div class="hero-divider"></div>
-
-
-        <div class="hero-meta">
-
-          <span>FIXTURES</span>
-
-          <span>•</span>
-
-          <span>TABLES</span>
-
-          <span>•</span>
-
-          <span>ACHIEVEMENTS</span>
-
-        </div>
-
+        <div class="hero-meta"><span>19–20 SEP</span><span>•</span><span>MESS GROUND</span><span>•</span><span>SPORTS ARENA</span></div>
       </div>
-
-
-      <div class="hero-artwork hero-artwork-small">
-
-        <img
-          src="assets/lexliga_logo_transparent.png"
-          alt="Lex Liga Futsal Championship artwork"
-          class="lexliga-logo-art"
-        />
-
-      </div>
-
     </div>
-
   </section>
 
-
   <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
-
-
-    <!-- UPDATE -->
-
     <div class="update-bar">
-
-      <div class="update-status">
-
-        <span class="status-pulse"></span>
-
-        <span id="lastUpdated">
-          Loading live data...
-        </span>
-
-      </div>
-
-
-      <button
-        id="refreshBtn"
-        class="refresh-button"
-        type="button"
-      >
-        ↻ Refresh
-      </button>
-
+      <div class="update-status"><span class="status-pulse"></span><span id="lastUpdated">Loading…</span></div>
+      <button id="refreshBtn" class="refresh-button" type="button">↻ Refresh</button>
     </div>
 
-
-    <!-- LIVE NOW -->
-
     <section>
-
       <div class="section-heading-row">
-
-        <div>
-
-          <p class="section-eyebrow">
-            MATCH CENTRE
-          </p>
-
-          <h2>
-            Live Now
-          </h2>
-
-        </div>
-
-        <span class="section-chip">
-          LIVE
-        </span>
-
+        <div><p class="section-eyebrow">MATCH CENTRE</p><h2>Live Now</h2></div>
+        <span class="section-chip">LIVE</span>
       </div>
-
-
-      <div
-        id="liveMatchesFixtures"
-        class="space-y-4"
-      >
-
-        <p class="empty-state">
-          No live matches right now
-        </p>
-
-      </div>
-
+      <div id="liveMatchesFixtures" class="space-y-4"><p class="empty-state">No live matches right now</p></div>
     </section>
 
-
-    <!-- STANDINGS -->
-
     <section>
-
       <div class="section-heading-row">
-
-        <div>
-
-          <p class="section-eyebrow">
-            GROUP TABLES
-          </p>
-
-          <h2>
-            Standings
-          </h2>
-
-        </div>
-
+        <div><p class="section-eyebrow">GROUP TABLES</p><h2>Standings</h2></div>
       </div>
-
-
-      <div
-        id="fullStandings"
-        class="space-y-6"
-      >
-
-        <p class="empty-state">
-          Loading standings...
-        </p>
-
-      </div>
-
+      <div id="fullStandings" class="space-y-6"><p class="empty-state">Loading standings...</p></div>
     </section>
 
-
-    <!-- MATCHES -->
-
     <section>
-
       <div class="section-heading-row">
-
-        <div>
-
-          <p class="section-eyebrow">
-            SCHEDULE
-          </p>
-
-          <h2>
-            All Matches
-          </h2>
-
-        </div>
-
+        <div><p class="section-eyebrow">SCHEDULE</p><h2>All Matches</h2></div>
       </div>
-
-
-      <div
-        id="allFixtures"
-        class="space-y-4"
-      >
-
-        <p class="empty-state">
-          Loading fixtures...
-        </p>
-
-      </div>
-
+      <div id="allFixtures" class="space-y-4"><p class="empty-state">Loading fixtures...</p></div>
     </section>
-
-
-    <!-- RULES -->
 
     <section class="info-section rounded-2xl p-5 sm:p-6">
-
       <div class="section-heading-row mb-4">
-
-        <div>
-
-          <p class="section-eyebrow">
-            TOURNAMENT
-          </p>
-
-          <h2>
-            Rules &amp; Format
-          </h2>
-
-        </div>
-
+        <div><p class="section-eyebrow">OFFICIAL</p><h2>Rulebooks & Fixtures</h2></div>
       </div>
-
-
-      <ul class="rules-list">
-
-        <li>
-
-          <span>
-            01
-          </span>
-
-          <p>
-            Group stage followed by knockout rounds.
-          </p>
-
-        </li>
-
-
-        <li>
-
-          <span>
-            02
-          </span>
-
-          <p>
-            3 points for a win and 1 point for a draw.
-          </p>
-
-        </li>
-
-
-        <li>
-
-          <span>
-            03
-          </span>
-
-          <p>
-            Matches are played over 2 × 20 minutes.
-          </p>
-
-        </li>
-
-
-        <li>
-
-          <span>
-            04
-          </span>
-
-          <p>
-            Top teams from each group progress to the next stage.
-          </p>
-
-        </li>
-
-
-        <li>
-
-          <span>
-            05
-          </span>
-
-          <p>
-            Fair play is mandatory. Yellow and red cards are officially recorded.
-          </p>
-
-        </li>
-
-      </ul>
-
+      <div class="grid sm:grid-cols-3 gap-3">
+        <a href="assets/rules/futsal-rulebook.pdf" target="_blank" rel="noopener"
+          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition">
+          <div class="text-2xl mb-1">⚽</div>
+          <div class="font-bold text-sm">Futsal Rulebook</div>
+          <div class="text-xs text-slate-400 mt-1">Official PDF</div>
+        </a>
+        <a href="assets/rules/badminton-rulebook.pdf" target="_blank" rel="noopener"
+          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition">
+          <div class="text-2xl mb-1">🏸</div>
+          <div class="font-bold text-sm">Badminton Rulebook</div>
+          <div class="text-xs text-slate-400 mt-1">Official PDF</div>
+        </a>
+        <a href="assets/rules/fixtures.pdf" target="_blank" rel="noopener"
+          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-amber-500/50 transition">
+          <div class="text-2xl mb-1">📋</div>
+          <div class="font-bold text-sm">Fixtures PDF</div>
+          <div class="text-xs text-slate-400 mt-1">Upload when ready</div>
+        </a>
+      </div>
+      <p class="text-xs text-slate-500 mt-3">Upload PDFs into <code class="text-slate-400">assets/rules/</code> on GitHub if links show 404.</p>
     </section>
-
-
-    <!-- ACHIEVEMENTS -->
 
     <section class="info-section rounded-2xl p-5 sm:p-6">
-
-      <div class="section-heading-row mb-3">
-
-        <div>
-
-          <p class="section-eyebrow">
-            TOURNAMENT HIGHLIGHTS
-          </p>
-
-          <h2>
-            Achievements
-          </h2>
-
-        </div>
-
+      <div class="section-heading-row mb-4">
+        <div><p class="section-eyebrow">FUTSAL</p><h2>Rules & Format</h2></div>
       </div>
-
-
-      <p class="achievement-intro text-sm mb-5">
-
-        Follow the tournament's leading scorers,
-        group leaders and standout performances
-        as the competition develops.
-
-      </p>
-
-
-      <div
-        id="achievementsGrid"
-        class="grid sm:grid-cols-2 gap-4"
-      >
-
-        <div class="achievement-card rounded-2xl p-5">
-
-          <div class="achievement-icon">
-            ⚽
-          </div>
-
-          <div>
-
-            <p class="font-bold text-primary">
-              Golden Boot
-            </p>
-
-            <p class="achievement-muted mt-1">
-              Loading tournament leader...
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="achievement-card rounded-2xl p-5">
-
-          <div class="achievement-icon">
-            🏆
-          </div>
-
-          <div>
-
-            <p class="font-bold text-primary">
-              Group Leaders
-            </p>
-
-            <p class="achievement-muted mt-1">
-              Current leaders by group.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="achievement-card rounded-2xl p-5">
-
-          <div class="achievement-icon">
-            🔥
-          </div>
-
-          <div>
-
-            <p class="font-bold text-primary">
-              Tournament Milestones
-            </p>
-
-            <p class="achievement-muted mt-1">
-              Major scoring and match milestones.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="achievement-card rounded-2xl p-5">
-
-          <div class="achievement-icon">
-            ⭐
-          </div>
-
-          <div>
-
-            <p class="font-bold text-primary">
-              Standout Performances
-            </p>
-
-            <p class="achievement-muted mt-1">
-              Exceptional player and team performances.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
+      <ul class="rules-list">
+        <li><span>01</span><p>5v5 + 2 rolling substitutes (max 7 roster). At least 4 players to start.</p></li>
+        <li><span>02</span><p>Match: 2 × 8 minutes, 3 min half-time. Continuous clock (ref may stop for injury).</p></li>
+        <li><span>03</span><p>Group stage → 8-team knockout. Points: Win 3, Draw 1, Loss 0.</p></li>
+        <li><span>04</span><p>5 group winners + 3 best runners-up qualify. Tie-break: GD, GF, GA, H2H.</p></li>
+        <li><span>05</span><p>Knockout draw → extra time → 5 penalties → sudden death.</p></li>
+        <li><span>06</span><p>Yellow = 1-minute suspension (team plays short). Red = sent off.</p></li>
+        <li><span>07</span><p>No offside. Fair play required. Referee decisions are final.</p></li>
+      </ul>
     </section>
-
   </main>
 
-
-  <!-- FLOATING INSTAGRAM -->
-
-  <a
-    href="https://www.instagram.com/sacc_.official"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="floating-social"
-    id="floatingSocial"
-    aria-label="Follow SACC on Instagram"
-  >
-
-    <span class="floating-social-icon">
-
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="5"
-          stroke="currentColor"
-          stroke-width="1.8"
-        />
-
-        <circle
-          cx="12"
-          cy="12"
-          r="4.2"
-          stroke="currentColor"
-          stroke-width="1.8"
-        />
-
-        <circle
-          cx="17.4"
-          cy="6.7"
-          r="1"
-          fill="currentColor"
-        />
-
-      </svg>
-
-    </span>
-
-
-    <span class="floating-social-text">
-
-      <small>
-        FOLLOW SACC
-      </small>
-
-      <strong>
-        Instagram ↗
-      </strong>
-
-    </span>
-
-  </a>
-
-
-  <!-- FOOTER -->
-
   <footer class="site-footer">
-
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-
       <div class="footer-content">
-
-
         <div class="footer-credit-block">
-
-          <span class="footer-label">
-            Created by
-          </span>
-
-          <strong class="footer-name">
-            Jatin Narula
-          </strong>
-
+          <span class="footer-label">Created by</span>
+          <strong class="footer-name">Jatin Narula</strong>
         </div>
-
-
         <div class="footer-credit-block">
-
-          <span class="footer-label">
-            Managed by
-          </span>
-
-          <strong class="footer-name">
-            Sports &amp; Cultural Committee
-          </strong>
-
-          <span class="footer-subtext">
-            (SACC), SLFJPS, NFSU
-          </span>
-
+          <span class="footer-label">Managed by</span>
+          <strong class="footer-name">Sports & Cultural Committee</strong>
+          <span class="footer-subtext">(SACC), SLFJPS, NFSU</span>
         </div>
-
-
-        <a
-          href="https://www.instagram.com/sacc_.official"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="instagram-card"
-        >
-
-          <div class="instagram-icon">
-
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-
-              <rect
-                x="3"
-                y="3"
-                width="18"
-                height="18"
-                rx="5"
-                stroke="currentColor"
-                stroke-width="1.8"
-              />
-
-              <circle
-                cx="12"
-                cy="12"
-                r="4.2"
-                stroke="currentColor"
-                stroke-width="1.8"
-              />
-
-              <circle
-                cx="17.4"
-                cy="6.7"
-                r="1"
-                fill="currentColor"
-              />
-
-            </svg>
-
-          </div>
-
-
-          <div class="instagram-copy">
-
-            <span class="instagram-label">
-              Follow SACC
-            </span>
-
-            <span class="instagram-handle">
-              @sacc_.official
-            </span>
-
-          </div>
-
-
-          <span class="instagram-arrow">
-            ↗
-          </span>
-
-        </a>
-
       </div>
-
-
-      <div class="footer-bottom">
-
-        <span>
-          Lex Liga 2026
-        </span>
-
-        <span class="footer-dot">
-          •
-        </span>
-
-        <span>
-          Live scoring &amp; tournament centre
-        </span>
-
-      </div>
-
     </div>
-
   </footer>
 
-
-  <!-- SCRIPTS -->
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-
   <script src="js/supabase-config.js"></script>
-
+  <script src="js/mobile-nav.js"></script>
   <script src="js/app.js"></script>
-
+  <script src="js/announce.js"></script>
+  <script src="js/pwa-register.js"></script>
 </body>
 </html>
