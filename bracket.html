@@ -94,7 +94,6 @@
       <div class="section-heading-row">
         <div><p class="section-eyebrow">⚽ FUTSAL</p><h2>Fixtures</h2></div>
       </div>
-      <p class="text-xs text-slate-500 mb-4">Official order · scores update live</p>
       <div id="futsalList"><p class="empty-state">Loading…</p></div>
     </section>
 
@@ -102,7 +101,6 @@
       <div class="section-heading-row">
         <div><p class="section-eyebrow">⚽ FUTSAL</p><h2>Knockout</h2></div>
       </div>
-      <p class="text-xs text-slate-500 mb-4">QF · SF · Final (set group name in admin)</p>
       <div id="bracketFutsal" class="bracket-scroll"><p class="empty-state">Knockout not started yet.</p></div>
     </section>
 
@@ -110,34 +108,22 @@
       <div class="section-heading-row">
         <div><p class="section-eyebrow">🏸 BADMINTON</p><h2>Matches</h2></div>
       </div>
-      <p class="text-xs text-slate-500 mb-4">Knock-out draw · add matches in admin</p>
       <div id="bracketBm"><p class="empty-state">No badminton matches yet.</p></div>
     </section>
   </main>
-
-  <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="floating-social" aria-label="Follow SACC on Instagram">
-    <span class="floating-social-icon">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg>
-    </span>
-    <span class="floating-social-text"><small>FOLLOW SACC</small><strong>Instagram ↗</strong></span>
-  </a>
 
   <footer class="site-footer">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <div class="footer-content">
         <div class="footer-credit-block"><span class="footer-label">Created by</span><strong class="footer-name">Jatin Narula</strong></div>
         <div class="footer-credit-block"><span class="footer-label">Managed by</span><strong class="footer-name">Sports &amp; Cultural Committee</strong><span class="footer-subtext">(SACC), SLFJPS, NFSU</span></div>
-        <a href="https://www.instagram.com/sacc_.official" target="_blank" rel="noopener noreferrer" class="instagram-card">
-          <div class="instagram-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor"/></svg></div>
-          <div class="instagram-copy"><span class="instagram-label">Follow SACC</span><span class="instagram-handle">@sacc_.official</span></div>
-          <span class="instagram-arrow">↗</span>
-        </a>
       </div>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
+  <script src="js/mobile-nav.js"></script>
   <script src="js/announce.js"></script>
   <script src="js/pwa-register.js"></script>
   <script>
@@ -217,7 +203,9 @@
             var showScore = m.status !== 'not_started';
             return '<div class="fx-row">' +
               '<span class="fx-num">' + (i + 1) + '</span>' +
-              '<div class="fx-teams"><strong>' + h + '</strong><span class="fx-vs">VS</span><strong>' + a + '</strong></div>' +
+              '<div class="fx-teams"><strong>' + h + '</strong><span class="fx-vs">VS</span><strong>' + a + '</strong>' +
+              (m.group_name ? '<div class="text-[11px] text-slate-500 mt-0.5">' + m.group_name + '</div>' : '') +
+              '</div>' +
               (showScore ? '<span class="fx-score">' + hs + '&ndash;' + as + '</span>' : '') +
               '<span class="fx-status ' + statusCls(m.status) + '">' + statusLabel(m.status) + '</span>' +
               '</div>';
@@ -238,7 +226,7 @@
       var bmEl = document.getElementById('bracketBm');
       if (bmEl) {
         if (!bm.length) {
-          bmEl.innerHTML = '<p class="empty-state">No badminton matches yet — add from admin.</p>';
+          bmEl.innerHTML = '<p class="empty-state">No badminton matches yet.</p>';
         } else {
           bmEl.innerHTML = bm.map(function (m, i) {
             var p1 = Number(m.g1_p1) || 0;
