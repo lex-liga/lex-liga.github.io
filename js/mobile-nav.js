@@ -5,7 +5,6 @@
     { href: 'futsal.html', label: '⚽ Futsal', id: 'futsal', sport: true },
     { href: 'badminton.html', label: '🏸 Badminton', id: 'badminton', sport: true },
     { href: 'teams.html', label: 'Teams', id: 'teams' },
-    { href: 'bracket.html', label: 'Bracket', id: 'bracket' },
     { href: 'gallery.html', label: 'Photos', id: 'gallery' },
     { href: 'fixtures.html', label: 'Fixtures', id: 'fixtures' }
   ];
@@ -35,7 +34,6 @@
       (cur === 'badminton.html' ? ' aria-current="page"' : '') + '><span>🏸</span> Badminton</a>' +
       '</div>' +
       '<a href="teams.html" class="nav-link' + (cur === 'teams.html' ? ' is-active' : '') + '">Teams</a>' +
-      '<a href="bracket.html" class="nav-link' + (cur === 'bracket.html' ? ' is-active' : '') + '">Bracket</a>' +
       '<a href="gallery.html" class="nav-link' + (cur === 'gallery.html' ? ' is-active' : '') + '">Photos</a>' +
       '<a href="fixtures.html" class="nav-link' + (cur === 'fixtures.html' ? ' is-active' : '') + '">Fixtures</a>' +
       '<button type="button" id="navBurger" class="nav-burger" aria-label="Open menu">☰</button>' +
