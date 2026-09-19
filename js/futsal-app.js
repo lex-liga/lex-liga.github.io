@@ -93,127 +93,580 @@ function teamGroupLabel(t) {
 
 function computeStandings() {
   const table = {};
+
   allTeams.forEach(t => {
     table[t.id] = {
-      id: t.id, name: t.name, group: teamGroupLabel(t),
-      played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0
+      id: t.id,
+      name: t.name,
+      group: teamGroupLabel(t),
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      gf: 0,
+      ga: 0,
+      pts: 0
     };
   });
+
   allMatches.forEach(m => {
-    if (m.status !== 'finished' && m.status !== 'walkover') return;
+    if (
+      m.status !== 'finished' &&
+      m.status !== 'walkover'
+    ) {
+      return;
+    }
+
     const home = table[m.home_team_id];
     const away = table[m.away_team_id];
-    if (!home || !away) return;
+
+    if (!home || !away) {
+      return;
+    }
+
     const hs = Number(m.home_score) || 0;
     const as = Number(m.away_score) || 0;
-    home.played++; away.played++;
-    home.gf += hs; home.ga += as;
-    away.gf += as; away.ga += hs;
+
+    home.played++;
+    away.played++;
+
+    home.gf += hs;
+    home.ga += as;
+
+    away.gf += as;
+    away.ga += hs;
+
     const side = matchWinnerSide(m);
-    if (side === 'home') { home.won++; away.lost++; home.pts += 3; }
-    else if (side === 'away') { away.won++; home.lost++; away.pts += 3; }
-    else { home.drawn++; away.drawn++; home.pts += 1; away.pts += 1; }
+
+    if (side === 'home') {
+      home.won++;
+      away.lost++;
+      home.pts += 3;
+    } else if (side === 'away') {
+      away.won++;
+      home.lost++;
+      away.pts += 3;
+    } else {
+      home.drawn++;
+      away.drawn++;
+      home.pts += 1;
+      away.pts += 1;
+    }
   });
+
   return Object.values(table);
+}
+
+/*
+ * Head-to-head tiebreak.
+ *
+ * The official rulebook specifies:
+ *   Points → Goal Difference → Goals Scored
+ *   → Goals Conceded → Head-to-Head.
+ *
+ * The group-stage format also specifies that every team
+ * plays every other team once, so for a two-team tie there
+ * should be one direct group-stage result to use here.
+ *
+ * Knockout matches are ignored when the match carries a
+ * group_name different from the teams' group.
+ *
+ * For ties involving more than two teams, the rulebook does
+ * not specify a multi-team head-to-head procedure. In that
+ * situation we leave the remaining order deterministic and
+ * do not invent an additional competition rule.
+ */
+function headToHeadWinner(teamA, teamB) {
+  if (
+    !teamA ||
+    !teamB ||
+    !teamA.group ||
+    teamA.group !== teamB.group
+  ) {
+    return null;
+  }
+
+  const matches = allMatches.filter(m => {
+    if (
+      m.status !== 'finished' &&
+      m.status !== 'walkover'
+    ) {
+      return false;
+    }
+
+    if (
+      m.group_name &&
+      m.group_name !== teamA.group
+    ) {
+      return false;
+    }
+
+    const aIsHome =
+      m.home_team_id === teamA.id &&
+      m.away_team_id === teamB.id;
+
+    const aIsAway =
+      m.home_team_id === teamB.id &&
+      m.away_team_id === teamA.id;
+
+    return aIsHome || aIsAway;
+  });
+
+  if (matches.length !== 1) {
+    return null;
+  }
+
+  const m = matches[0];
+
+  const hs = Number(m.home_score) || 0;
+  const as = Number(m.away_score) || 0;
+
+  if (hs === as) {
+    return null;
+  }
+
+  const aIsHome =
+    m.home_team_id === teamA.id;
+
+  if (aIsHome) {
+    return hs > as ? teamA.id : teamB.id;
+  }
+
+  return as > hs ? teamA.id : teamB.id;
 }
 
 function renderStandings(rows) {
   if (!rows.length) return '<p class="empty-state">No standings yet</p>';
+
   const byGroup = {};
+
   rows.forEach(r => {
     const g = r.group || 'Other';
-    if (!byGroup[g]) byGroup[g] = [];
+
+    if (!byGroup[g]) {
+      byGroup[g] = [];
+    }
+
     byGroup[g].push(r);
   });
+
   const order = ['Group A', 'Group B'].concat(
-    Object.keys(byGroup).filter(g => g !== 'Group A' && g !== 'Group B').sort()
+    Object.keys(byGroup)
+      .filter(g => g !== 'Group A' && g !== 'Group B')
+      .sort()
   );
-  const sortRows = (list) => list.slice().sort((a, b) =>
-    b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf || a.name.localeCompare(b.name)
-  );
-  return order.filter(g => byGroup[g] && byGroup[g].length).map(g => {
-    const list = sortRows(byGroup[g]);
-    return '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
-      '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' + escapeHtml(g) + '</div>' +
-      '<table class="w-full text-sm"><thead><tr class="text-slate-500 text-xs">' +
-      '<th class="text-left p-2">#</th><th class="text-left p-2">Team</th><th class="p-2">P</th><th class="p-2">W</th><th class="p-2">D</th><th class="p-2">L</th><th class="p-2">GD</th><th class="p-2">Pts</th></tr></thead><tbody>' +
-      list.map((r, i) => '<tr class="border-t border-slate-800">' +
-        '<td class="p-2 text-slate-500">' + (i + 1) + '</td>' +
-        '<td class="p-2 font-semibold">' + escapeHtml(r.name) + '</td>' +
-        '<td class="p-2 text-center">' + r.played + '</td>' +
-        '<td class="p-2 text-center">' + r.won + '</td>' +
-        '<td class="p-2 text-center">' + r.drawn + '</td>' +
-        '<td class="p-2 text-center">' + r.lost + '</td>' +
-        '<td class="p-2 text-center">' + (r.gf - r.ga) + '</td>' +
-        '<td class="p-2 text-center font-bold text-green-400">' + r.pts + '</td></tr>').join('') +
-      '</tbody></table></div>';
-  }).join('');
+
+  const sortRows = (list) => {
+    const rows = list.slice();
+
+    /*
+     * First apply the documented aggregate tiebreaks:
+     * Points → GD → GF → GA.
+     */
+    rows.sort((a, b) => {
+      if (b.pts !== a.pts) {
+        return b.pts - a.pts;
+      }
+
+      const gdA = a.gf - a.ga;
+      const gdB = b.gf - b.ga;
+
+      if (gdB !== gdA) {
+        return gdB - gdA;
+      }
+
+      if (b.gf !== a.gf) {
+        return b.gf - a.gf;
+      }
+
+      if (a.ga !== b.ga) {
+        return a.ga - b.ga;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
+    /*
+     * Now identify teams tied on every previous criterion.
+     * Head-to-head is applied only when exactly two teams
+     * remain tied, which matches the rulebook's singular
+     * head-to-head result between opponents who played once.
+     */
+    const tieGroups = {};
+
+    rows.forEach(row => {
+      const gd = row.gf - row.ga;
+
+      const key = [
+        row.pts,
+        gd,
+        row.gf,
+        row.ga
+      ].join('|');
+
+      if (!tieGroups[key]) {
+        tieGroups[key] = [];
+      }
+
+      tieGroups[key].push(row);
+    });
+
+    Object.keys(tieGroups).forEach(key => {
+      const tied = tieGroups[key];
+
+      if (tied.length !== 2) {
+        return;
+      }
+
+      const winnerId =
+        headToHeadWinner(
+          tied[0],
+          tied[1]
+        );
+
+      if (!winnerId) {
+        return;
+      }
+
+      if (tied[0].id === winnerId) {
+        return;
+      }
+
+      const firstIndex =
+        rows.findIndex(
+          row => row.id === tied[0].id
+        );
+
+      const secondIndex =
+        rows.findIndex(
+          row => row.id === tied[1].id
+        );
+
+      if (
+        firstIndex < 0 ||
+        secondIndex < 0
+      ) {
+        return;
+      }
+
+      const temp = rows[firstIndex];
+
+      rows[firstIndex] =
+        rows[secondIndex];
+
+      rows[secondIndex] =
+        temp;
+    });
+
+    return rows;
+  };
+
+  return order
+    .filter(g => byGroup[g] && byGroup[g].length)
+    .map(g => {
+      const list = sortRows(byGroup[g]);
+
+      return '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
+        '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' +
+          escapeHtml(g) +
+        '</div>' +
+
+        '<table class="w-full text-sm"><thead><tr class="text-slate-500 text-xs">' +
+          '<th class="text-left p-2">#</th>' +
+          '<th class="text-left p-2">Team</th>' +
+          '<th class="p-2">P</th>' +
+          '<th class="p-2">W</th>' +
+          '<th class="p-2">D</th>' +
+          '<th class="p-2">L</th>' +
+          '<th class="p-2">GD</th>' +
+          '<th class="p-2">Pts</th>' +
+        '</tr></thead><tbody>' +
+
+        list.map((r, i) =>
+          '<tr class="border-t border-slate-800">' +
+            '<td class="p-2 text-slate-500">' +
+              (i + 1) +
+            '</td>' +
+
+            '<td class="p-2 font-semibold">' +
+              escapeHtml(r.name) +
+            '</td>' +
+
+            '<td class="p-2 text-center">' +
+              r.played +
+            '</td>' +
+
+            '<td class="p-2 text-center">' +
+              r.won +
+            '</td>' +
+
+            '<td class="p-2 text-center">' +
+              r.drawn +
+            '</td>' +
+
+            '<td class="p-2 text-center">' +
+              r.lost +
+            '</td>' +
+
+            '<td class="p-2 text-center">' +
+              (r.gf - r.ga) +
+            '</td>' +
+
+            '<td class="p-2 text-center font-bold text-green-400">' +
+              r.pts +
+            '</td>' +
+
+          '</tr>'
+        ).join('') +
+
+        '</tbody></table></div>';
+    })
+    .join('');
 }
 
 function renderTopScorers() {
   const counts = {};
+
   allGoals.forEach(g => {
-    const key = g.player_name + '|' + g.team_id;
-    if (!counts[key]) counts[key] = { name: g.player_name, team: getTeamName(g.team_id), n: 0 };
+    const key =
+      g.player_name +
+      '|' +
+      g.team_id;
+
+    if (!counts[key]) {
+      counts[key] = {
+        name: g.player_name,
+        team: getTeamName(g.team_id),
+        n: 0
+      };
+    }
+
     counts[key].n++;
   });
-  const rows = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 10);
-  if (!rows.length) return '<p class="empty-state p-4">No goals yet</p>';
-  return '<div class="divide-y divide-slate-800">' + rows.map((r, i) =>
-    '<div class="flex justify-between px-4 py-3 text-sm">' +
-      '<span><span class="text-slate-500 mr-2">' + (i + 1) + '</span>' + escapeHtml(r.name) +
-      ' <span class="text-slate-500">(' + escapeHtml(r.team) + ')</span></span>' +
-      '<span class="font-bold text-green-400">' + r.n + '</span></div>'
-  ).join('') + '</div>';
+
+  const rows =
+    Object.values(counts)
+      .sort((a, b) => b.n - a.n)
+      .slice(0, 10);
+
+  if (!rows.length) {
+    return '<p class="empty-state p-4">No goals yet</p>';
+  }
+
+  return '<div class="divide-y divide-slate-800">' +
+    rows.map((r, i) =>
+      '<div class="flex justify-between px-4 py-3 text-sm">' +
+        '<span>' +
+          '<span class="text-slate-500 mr-2">' +
+            (i + 1) +
+          '</span>' +
+
+          escapeHtml(r.name) +
+
+          ' <span class="text-slate-500">(' +
+            escapeHtml(r.team) +
+          ')</span>' +
+
+        '</span>' +
+
+        '<span class="font-bold text-green-400">' +
+          r.n +
+        '</span>' +
+
+      '</div>'
+    ).join('') +
+  '</div>';
 }
 
 async function loadFutsal() {
-  const updated = document.getElementById('lastUpdated');
-  if (updated) updated.textContent = 'Updating…';
+  const updated =
+    document.getElementById('lastUpdated');
+
+  if (updated) {
+    updated.textContent = 'Updating…';
+  }
+
   try {
-    if (!sb || typeof sb.from !== 'function') throw new Error('Supabase not ready');
-    const [tr, mr, gr] = await Promise.all([
-      sb.from('teams').select('*').order('name'),
-      sb.from('matches').select('*').order('kickoff_time', { ascending: true }),
-      sb.from('goals').select('*')
-    ]);
-    if (tr.error) throw tr.error;
-    if (mr.error) throw mr.error;
-    allTeams = tr.data || [];
-    allMatches = mr.data || [];
-    allGoals = gr.data || [];
-
-    const live = allMatches.filter(m => m.status === 'live' || m.status === 'half_time' || m.status === 'penalties');
-    const finished = allMatches.filter(m => m.status === 'finished' || m.status === 'walkover');
-
-    if (typeof window.lexWatchScores === 'function') {
-      window.lexWatchScores(live.map(m => ({
-        id: m.id,
-        label: getTeamName(m.home_team_id) + ' vs ' + getTeamName(m.away_team_id),
-        score: (m.home_score || 0) + '-' + (m.away_score || 0),
-        status: m.status
-      })));
+    if (
+      !sb ||
+      typeof sb.from !== 'function'
+    ) {
+      throw new Error('Supabase not ready');
     }
 
-    const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-    set('liveMatches', live.length ? live.map(renderMatchCard).join('') : '<p class="empty-state">No live matches</p>');
-    set('recentResults', finished.length ? finished.slice().reverse().slice(0, 12).map(renderMatchCard).join('') : '<p class="empty-state">No results yet</p>');
-    set('quickStandings', renderStandings(computeStandings()));
-    set('topScorers', renderTopScorers());
-    set('snapshotMatches', String(allMatches.length));
-    set('snapshotLive', String(live.length));
-    set('snapshotGoals', String(allGoals.length));
-    set('snapshotTeams', String(allTeams.length));
-    if (updated) updated.textContent = 'Updated ' + new Date().toLocaleTimeString();
+    const [tr, mr, gr] =
+      await Promise.all([
+        sb
+          .from('teams')
+          .select('*')
+          .order('name'),
+
+        sb
+          .from('matches')
+          .select('*')
+          .order(
+            'kickoff_time',
+            { ascending: true }
+          ),
+
+        sb
+          .from('goals')
+          .select('*')
+      ]);
+
+    if (tr.error) {
+      throw tr.error;
+    }
+
+    if (mr.error) {
+      throw mr.error;
+    }
+
+    allTeams =
+      tr.data || [];
+
+    allMatches =
+      mr.data || [];
+
+    allGoals =
+      gr.data || [];
+
+    const live =
+      allMatches.filter(
+        m =>
+          m.status === 'live' ||
+          m.status === 'half_time' ||
+          m.status === 'penalties'
+      );
+
+    const finished =
+      allMatches.filter(
+        m =>
+          m.status === 'finished' ||
+          m.status === 'walkover'
+      );
+
+    if (
+      typeof window.lexWatchScores === 'function'
+    ) {
+      window.lexWatchScores(
+        live.map(m => ({
+          id: m.id,
+
+          label:
+            getTeamName(m.home_team_id) +
+            ' vs ' +
+            getTeamName(m.away_team_id),
+
+          score:
+            (m.home_score || 0) +
+            '-' +
+            (m.away_score || 0),
+
+          status:
+            m.status
+        }))
+      );
+    }
+
+    const set = (id, html) => {
+      const el =
+        document.getElementById(id);
+
+      if (el) {
+        el.innerHTML = html;
+      }
+    };
+
+    set(
+      'liveMatches',
+      live.length
+        ? live.map(renderMatchCard).join('')
+        : '<p class="empty-state">No live matches</p>'
+    );
+
+    set(
+      'recentResults',
+      finished.length
+        ? finished
+            .slice()
+            .reverse()
+            .slice(0, 12)
+            .map(renderMatchCard)
+            .join('')
+        : '<p class="empty-state">No results yet</p>'
+    );
+
+    set(
+      'quickStandings',
+      renderStandings(
+        computeStandings()
+      )
+    );
+
+    set(
+      'topScorers',
+      renderTopScorers()
+    );
+
+    set(
+      'snapshotMatches',
+      String(allMatches.length)
+    );
+
+    set(
+      'snapshotLive',
+      String(live.length)
+    );
+
+    set(
+      'snapshotGoals',
+      String(allGoals.length)
+    );
+
+    set(
+      'snapshotTeams',
+      String(allTeams.length)
+    );
+
+    if (updated) {
+      updated.textContent =
+        'Updated ' +
+        new Date().toLocaleTimeString();
+    }
+
   } catch (err) {
     console.error(err);
-    ['liveMatches', 'recentResults', 'quickStandings', 'topScorers'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<p class="text-red-400 text-sm p-3">' + (err.message || 'Error') + '</p>';
+
+    [
+      'liveMatches',
+      'recentResults',
+      'quickStandings',
+      'topScorers'
+    ].forEach(id => {
+      const el =
+        document.getElementById(id);
+
+      if (el) {
+        el.innerHTML =
+          '<p class="text-red-400 text-sm p-3">' +
+          (err.message || 'Error') +
+          '</p>';
+      }
     });
   }
 }
 
-document.getElementById('refreshBtn')?.addEventListener('click', loadFutsal);
+document
+  .getElementById('refreshBtn')
+  ?.addEventListener(
+    'click',
+    loadFutsal
+  );
+
 loadFutsal();
-setInterval(loadFutsal, 12000);
+
+setInterval(
+  loadFutsal,
+  12000
+);
