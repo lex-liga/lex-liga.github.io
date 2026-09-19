@@ -5,7 +5,9 @@
   var sb =
     window.supabaseClient ||
     window.supabase ||
-    (typeof supabase !== 'undefined' ? supabase : null);
+    (typeof supabase !== 'undefined'
+      ? supabase
+      : null);
 
   function escapeHtml(s) {
     return String(s == null ? '' : s)
@@ -20,6 +22,7 @@
     if (
       s === 'live' ||
       s === 'half_time' ||
+      s === 'extra_time' ||
       s === 'penalties'
     ) {
       return 'live';
@@ -36,22 +39,37 @@
   }
 
   function statusLabel(s) {
-    if (s === 'live') return 'LIVE';
-    if (s === 'half_time') return 'HT';
-    if (s === 'penalties') return 'PENS';
+    if (s === 'live') {
+      return 'LIVE';
+    }
+
+    if (s === 'half_time') {
+      return 'HT';
+    }
+
+    if (s === 'extra_time') {
+      return 'ET';
+    }
+
+    if (s === 'penalties') {
+      return 'PENS';
+    }
 
     if (
       s === 'finished' ||
       s === 'walkover'
     ) {
-      return s === 'walkover' ? 'W/O' : 'FT';
+      return s === 'walkover'
+        ? 'W/O'
+        : 'FT';
     }
 
     return 'UP';
   }
 
   function statusStyle(status) {
-    var cls = statusCls(status);
+    var cls =
+      statusCls(status);
 
     if (cls === 'live') {
       return 'background:#dc2626;color:#fff';
@@ -89,6 +107,7 @@
         '<div style="flex:1;min-width:0">' +
 
           '<div>' +
+
             '<strong style="font-size:0.9rem;color:#f1f5f9">' +
               escapeHtml(left) +
             '</strong>' +
@@ -100,6 +119,7 @@
             '<strong style="font-size:0.9rem;color:#f1f5f9">' +
               escapeHtml(right) +
             '</strong>' +
+
           '</div>' +
 
           (
@@ -119,7 +139,9 @@
           'border-radius:999px;' +
           statusStyle(status) +
         '">' +
+
           statusLabel(status) +
+
         '</span>' +
 
       '</div>'
@@ -145,30 +167,35 @@
       if (existing) {
         var tries = 0;
 
-        var timer = setInterval(
-          function () {
-            tries++;
+        var timer =
+          setInterval(
+            function () {
+              tries++;
 
-            if (window.BadmintonRules) {
-              clearInterval(timer);
-              resolve(
+              if (
                 window.BadmintonRules
-              );
-              return;
-            }
+              ) {
+                clearInterval(timer);
 
-            if (tries >= 50) {
-              clearInterval(timer);
+                resolve(
+                  window.BadmintonRules
+                );
 
-              reject(
-                new Error(
-                  'Badminton scoring rules could not be loaded.'
-                )
-              );
-            }
-          },
-          100
-        );
+                return;
+              }
+
+              if (tries >= 50) {
+                clearInterval(timer);
+
+                reject(
+                  new Error(
+                    'Badminton scoring rules could not be loaded.'
+                  )
+                );
+              }
+            },
+            100
+          );
 
         return;
       }
@@ -185,7 +212,9 @@
 
       script.onload =
         function () {
-          if (window.BadmintonRules) {
+          if (
+            window.BadmintonRules
+          ) {
             resolve(
               window.BadmintonRules
             );
@@ -218,11 +247,14 @@
     num,
     rules
   ) {
-    var d = rules.getDisplay(m);
+    var d =
+      rules.getDisplay(m);
 
     var scoreHtml = '';
 
-    if (m.status !== 'not_started') {
+    if (
+      m.status !== 'not_started'
+    ) {
       if (d.bestOfThree) {
         scoreHtml =
           '<div style="text-align:right;white-space:nowrap">' +
@@ -292,13 +324,77 @@
     );
   }
 
+  function renderFutsalFixture(
+    m,
+    num,
+    teams
+  ) {
+    var h =
+      teams[m.home_team_id] ||
+      'TBD';
+
+    var a =
+      teams[m.away_team_id] ||
+      'TBD';
+
+    var show =
+      m.status !== 'not_started';
+
+    var score =
+      show
+        ? '<span style="font-weight:800;font-size:1rem;color:#e2e8f0;white-space:nowrap">' +
+          (m.home_score || 0) +
+          '–' +
+          (m.away_score || 0) +
+          '</span>'
+        : '';
+
+    var meta =
+      m.group_name || '';
+
+    var ph =
+      Number(m.pen_home) || 0;
+
+    var pa =
+      Number(m.pen_away) || 0;
+
+    var pensOn =
+      !!m.pens_on ||
+      m.status === 'penalties';
+
+    if (pensOn) {
+      meta +=
+        (meta ? ' · ' : '') +
+        'Pens ' +
+        ph +
+        '–' +
+        pa +
+        (
+          m.pens_sudden
+            ? ' · SD'
+            : ''
+        );
+    }
+
+    return rowHtml(
+      num,
+      h,
+      a,
+      score,
+      m.status,
+      meta
+    );
+  }
+
   async function loadFixtures() {
     var el =
       document.getElementById(
         'allFixtures'
       );
 
-    if (!el) return;
+    if (!el) {
+      return;
+    }
 
     if (
       !sb ||
@@ -343,7 +439,9 @@
           .select('*')
           .order(
             'kickoff_time',
-            { ascending: true }
+            {
+              ascending: true
+            }
           );
 
       if (fr.error) {
@@ -359,7 +457,9 @@
           .select('*')
           .order(
             'created_at',
-            { ascending: true }
+            {
+              ascending: true
+            }
           );
 
       if (br.error) {
@@ -384,7 +484,6 @@
 
       /*
        * FUTSAL
-       * Existing rendering retained.
        */
       if (futsal.length) {
         html +=
@@ -408,20 +507,31 @@
           }
         );
 
-        var order =
-          [
-            'Group A',
-            'Group B'
-          ].concat(
-            Object.keys(byG)
-              .filter(
-                function (g) {
-                  return (
-                    g !== 'Group A' &&
-                    g !== 'Group B'
-                  );
-                }
-              )
+        var order = [
+          'Group A',
+          'Group B',
+          'Group C',
+          'Group D',
+          'Group E',
+          'Quarter-finals',
+          'Semi-finals',
+          'Final'
+        ];
+
+        Object.keys(byG)
+          .filter(
+            function (g) {
+              return (
+                order.indexOf(g) <
+                0
+              );
+            }
+          )
+          .sort()
+          .forEach(
+            function (g) {
+              order.push(g);
+            }
           );
 
         order.forEach(
@@ -442,35 +552,11 @@
               function (m) {
                 n++;
 
-                var h =
-                  teams[m.home_team_id] ||
-                  'TBD';
-
-                var a =
-                  teams[m.away_team_id] ||
-                  'TBD';
-
-                var show =
-                  m.status !==
-                  'not_started';
-
-                var score =
-                  show
-                    ? '<span style="font-weight:800;font-size:1rem;color:#e2e8f0;white-space:nowrap">' +
-                      (m.home_score || 0) +
-                      '–' +
-                      (m.away_score || 0) +
-                      '</span>'
-                    : '';
-
                 html +=
-                  rowHtml(
+                  renderFutsalFixture(
+                    m,
                     n,
-                    h,
-                    a,
-                    score,
-                    m.status,
-                    m.group_name || ''
+                    teams
                   );
               }
             );
@@ -518,13 +604,17 @@
   }
 
   loadBadmintonRules()
-    .then(function () {
-      loadFixtures();
-    })
-    .catch(function (err) {
-      console.error(err);
-      loadFixtures();
-    });
+    .then(
+      function () {
+        loadFixtures();
+      }
+    )
+    .catch(
+      function (err) {
+        console.error(err);
+        loadFixtures();
+      }
+    );
 
   setInterval(
     loadFixtures,
