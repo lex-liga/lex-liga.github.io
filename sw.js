@@ -1,6 +1,6 @@
 /* Lex Liga service worker – app shell + notifications */
 
-var CACHE = 'lex-liga-v4';
+var CACHE = 'lex-liga-v5';
 
 var ASSETS = [
   './',
@@ -18,6 +18,7 @@ var ASSETS = [
   './js/home-app.js',
   './js/app.js',
   './js/badminton-app.js',
+  './js/badminton-rules.js',
   './js/fixtures-app.js',
   './js/teams-data.js',
   './js/announce.js',
@@ -38,7 +39,10 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE)
       .then(function (cache) {
         return cache.addAll(ASSETS).catch(function (err) {
-          console.warn('Some assets could not be cached:', err);
+          console.warn(
+            'Some assets could not be cached:',
+            err
+          );
         });
       })
       .then(function () {
@@ -87,43 +91,63 @@ self.addEventListener('message', function (event) {
 
   if (data.type === 'NOTIFY' && data.title) {
     event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body || '',
-        icon: data.icon || './assets/lexliga_logo_transparent.png',
-        badge: data.icon || './assets/lexliga_logo_transparent.png',
-        tag: data.tag || 'lex-liga',
-        renotify: true,
-        vibrate: [120, 60, 120],
-        data: {
-          url: data.url || './index.html'
+      self.registration.showNotification(
+        data.title,
+        {
+          body: data.body || '',
+          icon:
+            data.icon ||
+            './assets/lexliga_logo_transparent.png',
+          badge:
+            data.icon ||
+            './assets/lexliga_logo_transparent.png',
+          tag:
+            data.tag ||
+            'lex-liga',
+          renotify: true,
+          vibrate: [120, 60, 120],
+          data: {
+            url:
+              data.url ||
+              './index.html'
+          }
         }
-      })
+      )
     );
   }
 });
 
-self.addEventListener('notificationclick', function (event) {
-  event.notification.close();
+self.addEventListener(
+  'notificationclick',
+  function (event) {
+    event.notification.close();
 
-  var url =
-    (event.notification.data && event.notification.data.url) ||
-    './index.html';
+    var url =
+      (
+        event.notification.data &&
+        event.notification.data.url
+      ) ||
+      './index.html';
 
-  event.waitUntil(
-    clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true
-    }).then(function (list) {
+    event.waitUntil(
+      clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true
+      }).then(function (list) {
 
-      for (var i = 0; i < list.length; i++) {
-        if (list[i].url && 'focus' in list[i]) {
-          return list[i].focus();
+        for (var i = 0; i < list.length; i++) {
+          if (
+            list[i].url &&
+            'focus' in list[i]
+          ) {
+            return list[i].focus();
+          }
         }
-      }
 
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
-  );
-});
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
+    );
+  }
+);
