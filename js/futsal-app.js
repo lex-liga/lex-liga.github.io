@@ -83,10 +83,21 @@ function renderMatchCard(match) {
   );
 }
 
+function teamGroupLabel(t) {
+  if (t.group_name === 'Group A' || t.group_name === 'Group B') return t.group_name;
+  const n = (t.name || '').toLowerCase();
+  if (/thassa|hazel|predator|one last/.test(n)) return 'Group A';
+  if (/butterfly|og|beer/.test(n)) return 'Group B';
+  return t.group_name || 'Other';
+}
+
 function computeStandings() {
   const table = {};
   allTeams.forEach(t => {
-    table[t.id] = { id: t.id, name: t.name, group: t.group_name || '', played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0 };
+    table[t.id] = {
+      id: t.id, name: t.name, group: teamGroupLabel(t),
+      played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0
+    };
   });
   allMatches.forEach(m => {
     if (m.status !== 'finished' && m.status !== 'walkover') return;
@@ -103,24 +114,31 @@ function computeStandings() {
     else if (side === 'away') { away.won++; home.lost++; away.pts += 3; }
     else { home.drawn++; away.drawn++; home.pts += 1; away.pts += 1; }
   });
-  return Object.values(table).sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+  return Object.values(table);
 }
 
 function renderStandings(rows) {
   if (!rows.length) return '<p class="empty-state">No standings yet</p>';
   const byGroup = {};
   rows.forEach(r => {
-    const g = r.group || 'All';
+    const g = r.group || 'Other';
     if (!byGroup[g]) byGroup[g] = [];
     byGroup[g].push(r);
   });
-  return Object.keys(byGroup).map(g => {
-    const list = byGroup[g];
-    return '<div class="rounded-2xl border border-slate-700 overflow-hidden">' +
-      '<div class="px-4 py-2 bg-slate-800/80 text-xs font-bold text-green-400">' + escapeHtml(g) + '</div>' +
+  const order = ['Group A', 'Group B'].concat(
+    Object.keys(byGroup).filter(g => g !== 'Group A' && g !== 'Group B').sort()
+  );
+  const sortRows = (list) => list.slice().sort((a, b) =>
+    b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf || a.name.localeCompare(b.name)
+  );
+  return order.filter(g => byGroup[g] && byGroup[g].length).map(g => {
+    const list = sortRows(byGroup[g]);
+    return '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
+      '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' + escapeHtml(g) + '</div>' +
       '<table class="w-full text-sm"><thead><tr class="text-slate-500 text-xs">' +
-      '<th class="text-left p-2">Team</th><th class="p-2">P</th><th class="p-2">W</th><th class="p-2">D</th><th class="p-2">L</th><th class="p-2">GD</th><th class="p-2">Pts</th></tr></thead><tbody>' +
-      list.map(r => '<tr class="border-t border-slate-800">' +
+      '<th class="text-left p-2">#</th><th class="text-left p-2">Team</th><th class="p-2">P</th><th class="p-2">W</th><th class="p-2">D</th><th class="p-2">L</th><th class="p-2">GD</th><th class="p-2">Pts</th></tr></thead><tbody>' +
+      list.map((r, i) => '<tr class="border-t border-slate-800">' +
+        '<td class="p-2 text-slate-500">' + (i + 1) + '</td>' +
         '<td class="p-2 font-semibold">' + escapeHtml(r.name) + '</td>' +
         '<td class="p-2 text-center">' + r.played + '</td>' +
         '<td class="p-2 text-center">' + r.won + '</td>' +
@@ -165,7 +183,6 @@ async function loadFutsal() {
     allMatches = mr.data || [];
     allGoals = gr.data || [];
 
-    // Live section only: live + half-time + penalties (not finished)
     const live = allMatches.filter(m => m.status === 'live' || m.status === 'half_time' || m.status === 'penalties');
     const finished = allMatches.filter(m => m.status === 'finished' || m.status === 'walkover');
 
