@@ -1,4 +1,4 @@
-// Lex Liga Futsal public – pens + sudden death + standings + scorers
+// Lex Liga Futsal public – extra time + pens + sudden death + standings + scorers
 const sb = window.supabaseClient || window.supabase || supabase;
 let allTeams = [], allMatches = [], allGoals = [];
 
@@ -19,6 +19,7 @@ function statusBadge(status) {
   const map = {
     live: ['LIVE', 'bg-red-600 text-white'],
     half_time: ['HT', 'bg-orange-500 text-white'],
+    extra_time: ['ET', 'bg-purple-600 text-white'],
     penalties: ['PENS', 'bg-amber-500 text-slate-900'],
     finished: ['FT', 'bg-slate-600 text-slate-200'],
     walkover: ['WO', 'bg-slate-600 text-slate-200'],
@@ -89,7 +90,12 @@ function renderMatchCard(match) {
   );
 
   const pensSudden = !!match.pens_sudden;
-  const isHalf = match.status === 'half_time';
+
+  const isHalf =
+    match.status === 'half_time';
+
+  const isExtraTime =
+    match.status === 'extra_time';
 
   let result = '';
 
@@ -175,6 +181,12 @@ function renderMatchCard(match) {
       (
         isHalf
           ? '<div class="mb-2 text-center text-xs font-bold text-orange-400 tracking-wide">HALF-TIME</div>'
+          : ''
+      ) +
+
+      (
+        isExtraTime
+          ? '<div class="mb-2 text-center text-xs font-bold text-purple-400 tracking-wide">EXTRA TIME</div>'
           : ''
       ) +
 
@@ -282,12 +294,8 @@ function computeStandings() {
      *   2. group_name matches the home team's group
      *   3. group_name matches the away team's group
      *
-     * This prevents knockout matches such as:
-     *   Quarter-finals
-     *   Semi-finals
-     *   Final
-     *
-     * from affecting P, W, D, L, GF, GA, GD or Points.
+     * This prevents knockout matches from affecting
+     * P, W, D, L, GF, GA, GD or Points.
      */
     if (
       !m.group_name ||
@@ -330,28 +338,6 @@ function computeStandings() {
   return Object.values(table);
 }
 
-/*
- * Head-to-head tiebreak.
- *
- * Official order:
- *   Points → Goal Difference → Goals Scored
- *   → Goals Conceded → Head-to-Head.
- *
- * Group-stage matches are explicitly tagged as
- * "Group A" or "Group B" in the admin match form.
- *
- * Knockout matches use:
- *   "Quarter-finals"
- *   "Semi-finals"
- *   "Final"
- *
- * Therefore an exact group-name match is required here.
- *
- * For ties involving more than two teams, the rulebook does
- * not define a multi-team head-to-head calculation, so the
- * remaining order stays deterministic instead of inventing
- * an additional competition rule.
- */
 function headToHeadWinner(teamA, teamB) {
   if (
     !teamA ||
@@ -362,10 +348,6 @@ function headToHeadWinner(teamA, teamB) {
     return null;
   }
 
-  /*
-   * Only explicitly tagged group-stage matches
-   * can be used for H2H.
-   */
   const matches = allMatches.filter(m => {
     if (
       m.status !== 'finished' &&
@@ -389,9 +371,6 @@ function headToHeadWinner(teamA, teamB) {
     return aIsHome || aIsAway;
   });
 
-  /*
-   * Exactly one direct group-stage meeting is expected.
-   */
   if (matches.length !== 1) {
     return null;
   }
@@ -401,10 +380,6 @@ function headToHeadWinner(teamA, teamB) {
   const hs = Number(m.home_score) || 0;
   const as = Number(m.away_score) || 0;
 
-  /*
-   * A drawn group-stage match does not produce
-   * an H2H winner.
-   */
   if (hs === as) {
     return null;
   }
@@ -450,10 +425,6 @@ function renderStandings(rows) {
   const sortRows = list => {
     const rows = list.slice();
 
-    /*
-     * Documented aggregate tiebreaks:
-     * Points → GD → GF → GA.
-     */
     rows.sort((a, b) => {
       if (b.pts !== a.pts) {
         return b.pts - a.pts;
@@ -477,9 +448,6 @@ function renderStandings(rows) {
       return a.name.localeCompare(b.name);
     });
 
-    /*
-     * Identify teams tied on every previous criterion.
-     */
     const tieGroups = {};
 
     rows.forEach(row => {
@@ -499,9 +467,6 @@ function renderStandings(rows) {
       tieGroups[key].push(row);
     });
 
-    /*
-     * Apply H2H only for an exact two-team tie.
-     */
     Object.keys(tieGroups).forEach(key => {
       const tied = tieGroups[key];
 
@@ -774,6 +739,7 @@ async function loadFutsal() {
         m =>
           m.status === 'live' ||
           m.status === 'half_time' ||
+          m.status === 'extra_time' ||
           m.status === 'penalties'
       );
 
@@ -801,13 +767,12 @@ async function loadFutsal() {
               m.away_team_id
             ),
 
-          score:
+          scoreKey:
             (m.home_score || 0) +
             '-' +
             (m.away_score || 0),
 
-          status:
-            m.status
+          isLive: true
         }))
       );
     }
