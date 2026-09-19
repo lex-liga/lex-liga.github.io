@@ -3,12 +3,18 @@ const sb = window.supabaseClient || window.supabase || supabase;
 let allTeams = [], allMatches = [], allGoals = [];
 
 function escapeHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
+
 function getTeamName(id) {
   const t = allTeams.find(x => x.id === id);
   return t ? t.name : 'TBD';
 }
+
 function statusBadge(status) {
   const map = {
     live: ['LIVE', 'bg-red-600 text-white'],
@@ -18,11 +24,29 @@ function statusBadge(status) {
     walkover: ['WO', 'bg-slate-600 text-slate-200'],
     not_started: ['Upcoming', 'bg-blue-600/40 text-blue-200']
   };
-  const pair = map[status] || [status || '?', 'bg-slate-700 text-slate-300'];
-  return '<span class="status-badge status-' + (status || 'not_started') + ' text-xs font-bold px-2.5 py-1 rounded-full ' + pair[1] + '">' + pair[0] + '</span>';
+
+  const pair = map[status] || [
+    status || '?',
+    'bg-slate-700 text-slate-300'
+  ];
+
+  return (
+    '<span class="status-badge status-' +
+    (status || 'not_started') +
+    ' text-xs font-bold px-2.5 py-1 rounded-full ' +
+    pair[1] +
+    '">' +
+    pair[0] +
+    '</span>'
+  );
 }
+
 function teamGoals(match, teamId) {
-  return allGoals.filter(g => g.match_id === match.id && g.team_id === teamId);
+  return allGoals.filter(
+    g =>
+      g.match_id === match.id &&
+      g.team_id === teamId
+  );
 }
 
 function matchWinnerSide(match) {
@@ -30,64 +54,190 @@ function matchWinnerSide(match) {
   const as = Number(match.away_score) || 0;
   const ph = Number(match.pen_home) || 0;
   const pa = Number(match.pen_away) || 0;
-  const pensOn = !!(match.pens_on || match.status === 'penalties' || ph || pa);
+
+  const pensOn = !!(
+    match.pens_on ||
+    match.status === 'penalties' ||
+    ph ||
+    pa
+  );
+
   if (hs > as) return 'home';
   if (as > hs) return 'away';
+
   if (pensOn && ph > pa) return 'home';
   if (pensOn && pa > ph) return 'away';
+
   return null;
 }
 
 function renderMatchCard(match) {
   const home = getTeamName(match.home_team_id);
   const away = getTeamName(match.away_team_id);
+
   const hs = Number(match.home_score) || 0;
   const as = Number(match.away_score) || 0;
+
   const ph = Number(match.pen_home) || 0;
   const pa = Number(match.pen_away) || 0;
-  const pensOn = !!(match.pens_on || match.status === 'penalties' || ph || pa);
+
+  const pensOn = !!(
+    match.pens_on ||
+    match.status === 'penalties' ||
+    ph ||
+    pa
+  );
+
   const pensSudden = !!match.pens_sudden;
   const isHalf = match.status === 'half_time';
+
   let result = '';
-  if (match.status === 'finished' || match.status === 'walkover') {
-    if (hs > as) result = '<div class="match-winner">Winner: ' + escapeHtml(home) + '</div>';
-    else if (as > hs) result = '<div class="match-winner">Winner: ' + escapeHtml(away) + '</div>';
-    else if (pensOn && ph > pa) result = '<div class="match-winner">Winner: ' + escapeHtml(home) + ' <span style="opacity:.85">(on pens' + (pensSudden ? ' · SD' : '') + ')</span></div>';
-    else if (pensOn && pa > ph) result = '<div class="match-winner">Winner: ' + escapeHtml(away) + ' <span style="opacity:.85">(on pens' + (pensSudden ? ' · SD' : '') + ')</span></div>';
-    else result = '<div class="match-draw">Draw</div>';
+
+  if (
+    match.status === 'finished' ||
+    match.status === 'walkover'
+  ) {
+    if (hs > as) {
+      result =
+        '<div class="match-winner">Winner: ' +
+        escapeHtml(home) +
+        '</div>';
+    } else if (as > hs) {
+      result =
+        '<div class="match-winner">Winner: ' +
+        escapeHtml(away) +
+        '</div>';
+    } else if (pensOn && ph > pa) {
+      result =
+        '<div class="match-winner">Winner: ' +
+        escapeHtml(home) +
+        ' <span style="opacity:.85">(on pens' +
+        (pensSudden ? ' · SD' : '') +
+        ')</span></div>';
+    } else if (pensOn && pa > ph) {
+      result =
+        '<div class="match-winner">Winner: ' +
+        escapeHtml(away) +
+        ' <span style="opacity:.85">(on pens' +
+        (pensSudden ? ' · SD' : '') +
+        ')</span></div>';
+    } else {
+      result =
+        '<div class="match-draw">Draw</div>';
+    }
   }
-  const homeG = teamGoals(match, match.home_team_id).map(g =>
-    escapeHtml(g.player_name) + (g.minute ? " " + g.minute + "'" : '')
-  ).join(', ');
-  const awayG = teamGoals(match, match.away_team_id).map(g =>
-    escapeHtml(g.player_name) + (g.minute ? " " + g.minute + "'" : '')
-  ).join(', ');
+
+  const homeG = teamGoals(
+    match,
+    match.home_team_id
+  )
+    .map(
+      g =>
+        escapeHtml(g.player_name) +
+        (g.minute ? " " + g.minute + "'" : '')
+    )
+    .join(', ');
+
+  const awayG = teamGoals(
+    match,
+    match.away_team_id
+  )
+    .map(
+      g =>
+        escapeHtml(g.player_name) +
+        (g.minute ? " " + g.minute + "'" : '')
+    )
+    .join(', ');
+
   const pensLine = pensOn
-    ? '<div class="text-center text-sm mt-1 ' + (pensSudden ? 'text-red-400' : 'text-amber-400') + ' font-semibold">Pens ' + ph + '–' + pa + (pensSudden ? ' · SD' : '') + '</div>'
+    ? '<div class="text-center text-sm mt-1 ' +
+      (pensSudden
+        ? 'text-red-400'
+        : 'text-amber-400') +
+      ' font-semibold">Pens ' +
+      ph +
+      '–' +
+      pa +
+      (pensSudden ? ' · SD' : '') +
+      '</div>'
     : '';
+
   return (
     '<div class="match-card rounded-2xl p-4 border border-slate-700">' +
-      '<div class="flex items-center justify-between mb-2">' + statusBadge(match.status) +
-        '<span class="text-xs text-slate-400">' + escapeHtml(match.group_name || '') + '</span></div>' +
-      (isHalf ? '<div class="mb-2 text-center text-xs font-bold text-orange-400 tracking-wide">HALF-TIME</div>' : '') +
-      '<div class="grid grid-cols-3 gap-2 items-center text-center">' +
-        '<div class="text-sm font-semibold text-right truncate">' + escapeHtml(home) + '</div>' +
-        '<div class="text-2xl font-extrabold">' + hs + ' – ' + as + '</div>' +
-        '<div class="text-sm font-semibold text-left truncate">' + escapeHtml(away) + '</div>' +
+
+      '<div class="flex items-center justify-between mb-2">' +
+        statusBadge(match.status) +
+        '<span class="text-xs text-slate-400">' +
+          escapeHtml(match.group_name || '') +
+        '</span>' +
       '</div>' +
+
+      (
+        isHalf
+          ? '<div class="mb-2 text-center text-xs font-bold text-orange-400 tracking-wide">HALF-TIME</div>'
+          : ''
+      ) +
+
+      '<div class="grid grid-cols-3 gap-2 items-center text-center">' +
+
+        '<div class="text-sm font-semibold text-right truncate">' +
+          escapeHtml(home) +
+        '</div>' +
+
+        '<div class="text-2xl font-extrabold">' +
+          hs +
+          ' – ' +
+          as +
+        '</div>' +
+
+        '<div class="text-sm font-semibold text-left truncate">' +
+          escapeHtml(away) +
+        '</div>' +
+
+      '</div>' +
+
       pensLine +
       result +
-      ((homeG || awayG) ? '<div class="mt-2 text-xs text-slate-400 grid grid-cols-2 gap-2">' +
-        '<div class="text-right">' + (homeG || '') + '</div><div class="text-left">' + (awayG || '') + '</div></div>' : '') +
+
+      (
+        (homeG || awayG)
+          ? '<div class="mt-2 text-xs text-slate-400 grid grid-cols-2 gap-2">' +
+              '<div class="text-right">' +
+                (homeG || '') +
+              '</div>' +
+              '<div class="text-left">' +
+                (awayG || '') +
+              '</div>' +
+            '</div>'
+          : ''
+      ) +
+
     '</div>'
   );
 }
 
 function teamGroupLabel(t) {
-  if (t.group_name === 'Group A' || t.group_name === 'Group B') return t.group_name;
+  if (
+    t.group_name === 'Group A' ||
+    t.group_name === 'Group B'
+  ) {
+    return t.group_name;
+  }
+
   const n = (t.name || '').toLowerCase();
-  if (/thassa|hazel|predator|one last/.test(n)) return 'Group A';
-  if (/butterfly|og|beer/.test(n)) return 'Group B';
+
+  if (
+    /thassa|hazel|predator|one last/.test(n)
+  ) {
+    return 'Group A';
+  }
+
+  if (
+    /butterfly|og|beer/.test(n)
+  ) {
+    return 'Group B';
+  }
+
   return t.group_name || 'Other';
 }
 
@@ -160,21 +310,24 @@ function computeStandings() {
 /*
  * Head-to-head tiebreak.
  *
- * The official rulebook specifies:
+ * Official order:
  *   Points → Goal Difference → Goals Scored
  *   → Goals Conceded → Head-to-Head.
  *
- * The group-stage format also specifies that every team
- * plays every other team once, so for a two-team tie there
- * should be one direct group-stage result to use here.
+ * Group-stage matches are explicitly tagged as
+ * "Group A" or "Group B" in the admin match form.
  *
- * Knockout matches are ignored when the match carries a
- * group_name different from the teams' group.
+ * Knockout matches use:
+ *   "Quarter-finals"
+ *   "Semi-finals"
+ *   "Final"
+ *
+ * Therefore an exact group-name match is required here.
  *
  * For ties involving more than two teams, the rulebook does
- * not specify a multi-team head-to-head procedure. In that
- * situation we leave the remaining order deterministic and
- * do not invent an additional competition rule.
+ * not define a multi-team head-to-head calculation, so the
+ * remaining order stays deterministic instead of inventing
+ * an additional competition rule.
  */
 function headToHeadWinner(teamA, teamB) {
   if (
@@ -186,6 +339,10 @@ function headToHeadWinner(teamA, teamB) {
     return null;
   }
 
+  /*
+   * Only explicitly tagged group-stage matches
+   * can be used for H2H.
+   */
   const matches = allMatches.filter(m => {
     if (
       m.status !== 'finished' &&
@@ -194,10 +351,7 @@ function headToHeadWinner(teamA, teamB) {
       return false;
     }
 
-    if (
-      m.group_name &&
-      m.group_name !== teamA.group
-    ) {
+    if (m.group_name !== teamA.group) {
       return false;
     }
 
@@ -212,6 +366,9 @@ function headToHeadWinner(teamA, teamB) {
     return aIsHome || aIsAway;
   });
 
+  /*
+   * Exactly one direct group-stage meeting is expected.
+   */
   if (matches.length !== 1) {
     return null;
   }
@@ -221,22 +378,29 @@ function headToHeadWinner(teamA, teamB) {
   const hs = Number(m.home_score) || 0;
   const as = Number(m.away_score) || 0;
 
+  /*
+   * A drawn group-stage match does not produce
+   * an H2H winner.
+   */
   if (hs === as) {
     return null;
   }
 
-  const aIsHome =
-    m.home_team_id === teamA.id;
-
-  if (aIsHome) {
-    return hs > as ? teamA.id : teamB.id;
+  if (m.home_team_id === teamA.id) {
+    return hs > as
+      ? teamA.id
+      : teamB.id;
   }
 
-  return as > hs ? teamA.id : teamB.id;
+  return as > hs
+    ? teamA.id
+    : teamB.id;
 }
 
 function renderStandings(rows) {
-  if (!rows.length) return '<p class="empty-state">No standings yet</p>';
+  if (!rows.length) {
+    return '<p class="empty-state">No standings yet</p>';
+  }
 
   const byGroup = {};
 
@@ -252,15 +416,19 @@ function renderStandings(rows) {
 
   const order = ['Group A', 'Group B'].concat(
     Object.keys(byGroup)
-      .filter(g => g !== 'Group A' && g !== 'Group B')
+      .filter(
+        g =>
+          g !== 'Group A' &&
+          g !== 'Group B'
+      )
       .sort()
   );
 
-  const sortRows = (list) => {
+  const sortRows = list => {
     const rows = list.slice();
 
     /*
-     * First apply the documented aggregate tiebreaks:
+     * Documented aggregate tiebreaks:
      * Points → GD → GF → GA.
      */
     rows.sort((a, b) => {
@@ -287,10 +455,7 @@ function renderStandings(rows) {
     });
 
     /*
-     * Now identify teams tied on every previous criterion.
-     * Head-to-head is applied only when exactly two teams
-     * remain tied, which matches the rulebook's singular
-     * head-to-head result between opponents who played once.
+     * Identify teams tied on every previous criterion.
      */
     const tieGroups = {};
 
@@ -311,6 +476,9 @@ function renderStandings(rows) {
       tieGroups[key].push(row);
     });
 
+    /*
+     * Apply H2H only for an exact two-team tie.
+     */
     Object.keys(tieGroups).forEach(key => {
       const tied = tieGroups[key];
 
@@ -324,11 +492,10 @@ function renderStandings(rows) {
           tied[1]
         );
 
-      if (!winnerId) {
-        return;
-      }
-
-      if (tied[0].id === winnerId) {
+      if (
+        !winnerId ||
+        tied[0].id === winnerId
+      ) {
         return;
       }
 
@@ -362,64 +529,98 @@ function renderStandings(rows) {
   };
 
   return order
-    .filter(g => byGroup[g] && byGroup[g].length)
+    .filter(
+      g =>
+        byGroup[g] &&
+        byGroup[g].length
+    )
     .map(g => {
       const list = sortRows(byGroup[g]);
 
-      return '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
-        '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' +
-          escapeHtml(g) +
-        '</div>' +
+      return (
+        '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
 
-        '<table class="w-full text-sm"><thead><tr class="text-slate-500 text-xs">' +
-          '<th class="text-left p-2">#</th>' +
-          '<th class="text-left p-2">Team</th>' +
-          '<th class="p-2">P</th>' +
-          '<th class="p-2">W</th>' +
-          '<th class="p-2">D</th>' +
-          '<th class="p-2">L</th>' +
-          '<th class="p-2">GD</th>' +
-          '<th class="p-2">Pts</th>' +
-        '</tr></thead><tbody>' +
+          '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' +
+            escapeHtml(g) +
+          '</div>' +
 
-        list.map((r, i) =>
-          '<tr class="border-t border-slate-800">' +
-            '<td class="p-2 text-slate-500">' +
-              (i + 1) +
-            '</td>' +
+          '<div class="overflow-x-auto">' +
 
-            '<td class="p-2 font-semibold">' +
-              escapeHtml(r.name) +
-            '</td>' +
+            '<table class="w-full text-sm">' +
 
-            '<td class="p-2 text-center">' +
-              r.played +
-            '</td>' +
+              '<thead>' +
+                '<tr class="text-slate-500 text-xs">' +
 
-            '<td class="p-2 text-center">' +
-              r.won +
-            '</td>' +
+                  '<th class="text-left p-2">#</th>' +
+                  '<th class="text-left p-2">Team</th>' +
+                  '<th class="p-2">P</th>' +
+                  '<th class="p-2">W</th>' +
+                  '<th class="p-2">D</th>' +
+                  '<th class="p-2">L</th>' +
+                  '<th class="p-2">GF</th>' +
+                  '<th class="p-2">GA</th>' +
+                  '<th class="p-2">GD</th>' +
+                  '<th class="p-2">Pts</th>' +
 
-            '<td class="p-2 text-center">' +
-              r.drawn +
-            '</td>' +
+                '</tr>' +
+              '</thead>' +
 
-            '<td class="p-2 text-center">' +
-              r.lost +
-            '</td>' +
+              '<tbody>' +
 
-            '<td class="p-2 text-center">' +
-              (r.gf - r.ga) +
-            '</td>' +
+                list.map((r, i) =>
+                  '<tr class="border-t border-slate-800">' +
 
-            '<td class="p-2 text-center font-bold text-green-400">' +
-              r.pts +
-            '</td>' +
+                    '<td class="p-2 text-slate-500">' +
+                      (i + 1) +
+                    '</td>' +
 
-          '</tr>'
-        ).join('') +
+                    '<td class="p-2 font-semibold">' +
+                      escapeHtml(r.name) +
+                    '</td>' +
 
-        '</tbody></table></div>';
+                    '<td class="p-2 text-center">' +
+                      r.played +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      r.won +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      r.drawn +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      r.lost +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      r.gf +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      r.ga +
+                    '</td>' +
+
+                    '<td class="p-2 text-center">' +
+                      (r.gf - r.ga) +
+                    '</td>' +
+
+                    '<td class="p-2 text-center font-bold text-green-400">' +
+                      r.pts +
+                    '</td>' +
+
+                  '</tr>'
+                ).join('') +
+
+              '</tbody>' +
+
+            '</table>' +
+
+          '</div>' +
+
+        '</div>'
+      );
     })
     .join('');
 }
@@ -450,32 +651,42 @@ function renderTopScorers() {
       .slice(0, 10);
 
   if (!rows.length) {
-    return '<p class="empty-state p-4">No goals yet</p>';
+    return (
+      '<p class="empty-state p-4">' +
+      'No goals yet' +
+      '</p>'
+    );
   }
 
-  return '<div class="divide-y divide-slate-800">' +
-    rows.map((r, i) =>
-      '<div class="flex justify-between px-4 py-3 text-sm">' +
-        '<span>' +
-          '<span class="text-slate-500 mr-2">' +
-            (i + 1) +
+  return (
+    '<div class="divide-y divide-slate-800">' +
+
+      rows.map((r, i) =>
+        '<div class="flex justify-between px-4 py-3 text-sm">' +
+
+          '<span>' +
+
+            '<span class="text-slate-500 mr-2">' +
+              (i + 1) +
+            '</span>' +
+
+            escapeHtml(r.name) +
+
+            ' <span class="text-slate-500">(' +
+              escapeHtml(r.team) +
+            ')</span>' +
+
           '</span>' +
 
-          escapeHtml(r.name) +
+          '<span class="font-bold text-green-400">' +
+            r.n +
+          '</span>' +
 
-          ' <span class="text-slate-500">(' +
-            escapeHtml(r.team) +
-          ')</span>' +
+        '</div>'
+      ).join('') +
 
-        '</span>' +
-
-        '<span class="font-bold text-green-400">' +
-          r.n +
-        '</span>' +
-
-      '</div>'
-    ).join('') +
-  '</div>';
+    '</div>'
+  );
 }
 
 async function loadFutsal() {
@@ -491,7 +702,9 @@ async function loadFutsal() {
       !sb ||
       typeof sb.from !== 'function'
     ) {
-      throw new Error('Supabase not ready');
+      throw new Error(
+        'Supabase not ready'
+      );
     }
 
     const [tr, mr, gr] =
@@ -506,7 +719,9 @@ async function loadFutsal() {
           .select('*')
           .order(
             'kickoff_time',
-            { ascending: true }
+            {
+              ascending: true
+            }
           ),
 
         sb
@@ -547,16 +762,21 @@ async function loadFutsal() {
       );
 
     if (
-      typeof window.lexWatchScores === 'function'
+      typeof window.lexWatchScores ===
+      'function'
     ) {
       window.lexWatchScores(
         live.map(m => ({
           id: m.id,
 
           label:
-            getTeamName(m.home_team_id) +
+            getTeamName(
+              m.home_team_id
+            ) +
             ' vs ' +
-            getTeamName(m.away_team_id),
+            getTeamName(
+              m.away_team_id
+            ),
 
           score:
             (m.home_score || 0) +
@@ -581,7 +801,9 @@ async function loadFutsal() {
     set(
       'liveMatches',
       live.length
-        ? live.map(renderMatchCard).join('')
+        ? live
+            .map(renderMatchCard)
+            .join('')
         : '<p class="empty-state">No live matches</p>'
     );
 
@@ -611,22 +833,30 @@ async function loadFutsal() {
 
     set(
       'snapshotMatches',
-      String(allMatches.length)
+      String(
+        allMatches.length
+      )
     );
 
     set(
       'snapshotLive',
-      String(live.length)
+      String(
+        live.length
+      )
     );
 
     set(
       'snapshotGoals',
-      String(allGoals.length)
+      String(
+        allGoals.length
+      )
     );
 
     set(
       'snapshotTeams',
-      String(allTeams.length)
+      String(
+        allTeams.length
+      )
     );
 
     if (updated) {
