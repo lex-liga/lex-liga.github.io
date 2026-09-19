@@ -228,10 +228,6 @@ function renderMatchCard(match) {
   );
 }
 
-/*
- * Team grouping is driven by the actual group_name
- * stored on each team.
- */
 function teamGroupLabel(t) {
   const group =
     String(t.group_name || '').trim();
@@ -282,11 +278,6 @@ function computeStandings() {
       return;
     }
 
-    /*
-     * Group-stage only: both teams must be in the same Group A/B.
-     * Trust team groups (not match.group_name) so a mis-labeled fixture
-     * still updates the table correctly (e.g. draws).
-     */
     if (
       home.group !== away.group ||
       (home.group !== 'Group A' && home.group !== 'Group B')
@@ -697,6 +688,10 @@ function renderTopScorers() {
   const counts = {};
 
   allGoals.forEach(g => {
+    // Own goals do not count for Golden Boot
+    const pname = String(g.player_name || '');
+    if (/\(OG\)|own\s*goal/i.test(pname)) return;
+
     const key =
       g.player_name +
       '|' +
