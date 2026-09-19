@@ -887,21 +887,25 @@ async function loadFutsal() {
               ),
 
             scoreKey:
-              String(
-                m.home_score || 0
-              ) +
-              '-' +
-              String(
-                m.away_score || 0
-              ) +
-              '|pens:' +
-              String(
-                m.pen_home || 0
-              ) +
-              '-' +
-              String(
-                m.pen_away || 0
-              ),
+            String(
+              m.home_score || 0
+            ) +
+            '-' +
+            String(
+              m.away_score || 0
+            ) +
+            '|pens:' +
+            String(
+              m.pen_home || 0
+            ) +
+            '-' +
+            String(
+              m.pen_away || 0
+            ) +
+            '|status:' +
+            String(
+              m.status || ''
+            ),
 
             isLive:
               m.status ===
