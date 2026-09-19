@@ -3,6 +3,7 @@
 const sb = window.supabaseClient || window.supabase || supabase;
 
 const logoutBtn = document.getElementById('logoutBtn');
+
 logoutBtn?.addEventListener('click', () => {
   sessionStorage.removeItem('lexAdmin');
   sessionStorage.removeItem('lexAdminSport');
@@ -23,7 +24,10 @@ function getTeamName(id) {
 }
 
 function isKnockoutMatch(m) {
-  const g = String(m?.group_name || '').trim().toLowerCase();
+  const g =
+    String(m?.group_name || '')
+      .trim()
+      .toLowerCase();
 
   return (
     g === 'quarter-finals' ||
@@ -38,13 +42,6 @@ function isKnockoutMatch(m) {
   );
 }
 
-function scoresAreTied(m) {
-  return (
-    (Number(m.home_score) || 0) ===
-    (Number(m.away_score) || 0)
-  );
-}
-
 function hasPenaltyData(m) {
   return !!(
     m.pens_on ||
@@ -56,7 +53,9 @@ function hasPenaltyData(m) {
 
 async function loadAdminData() {
   const container =
-    document.getElementById('adminMatches');
+    document.getElementById(
+      'adminMatches'
+    );
 
   if (!container) return;
 
@@ -68,7 +67,9 @@ async function loadAdminData() {
     typeof sb.from !== 'function'
   ) {
     container.innerHTML =
-      '<p class="text-red-400 text-sm text-center">Supabase not ready. Please hard-refresh.</p>';
+      '<p class="text-red-400 text-sm text-center">' +
+      'Supabase not ready. Please hard-refresh.' +
+      '</p>';
 
     return;
   }
@@ -82,17 +83,27 @@ async function loadAdminData() {
       .select('*')
       .order('name');
 
-    if (te) throw te;
+    if (te) {
+      throw te;
+    }
 
-    allTeams = teams || [];
+    allTeams =
+      teams || [];
 
     const homeSelect =
-      document.getElementById('newHome');
+      document.getElementById(
+        'newHome'
+      );
 
     const awaySelect =
-      document.getElementById('newAway');
+      document.getElementById(
+        'newAway'
+      );
 
-    if (homeSelect && awaySelect) {
+    if (
+      homeSelect &&
+      awaySelect
+    ) {
       const opts =
         allTeams
           .map(
@@ -101,8 +112,11 @@ async function loadAdminData() {
           )
           .join('');
 
-      homeSelect.innerHTML = opts;
-      awaySelect.innerHTML = opts;
+      homeSelect.innerHTML =
+        opts;
+
+      awaySelect.innerHTML =
+        opts;
     }
 
     const {
@@ -118,7 +132,9 @@ async function loadAdminData() {
         }
       );
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     const {
       data: goals
@@ -126,7 +142,8 @@ async function loadAdminData() {
       .from('goals')
       .select('*');
 
-    allGoals = goals || [];
+    allGoals =
+      goals || [];
 
     try {
       const {
@@ -135,7 +152,8 @@ async function loadAdminData() {
         .from('cards')
         .select('*');
 
-      allCards = cards || [];
+      allCards =
+        cards || [];
     } catch (e) {
       allCards = [];
     }
@@ -145,14 +163,19 @@ async function loadAdminData() {
       matches.length === 0
     ) {
       container.innerHTML =
-        '<p class="text-slate-400 text-sm text-center py-6">No matches yet.<br>Add one below.</p>';
+        '<p class="text-slate-400 text-sm text-center py-6">' +
+        'No matches yet.<br>Add one below.' +
+        '</p>';
 
       return;
     }
 
     container.innerHTML =
       matches
-        .map(m => renderAdminCard(m))
+        .map(
+          m =>
+            renderAdminCard(m)
+        )
         .join('');
 
   } catch (err) {
@@ -165,14 +188,19 @@ async function loadAdminData() {
   }
 }
 
-window.loadAdminData = loadAdminData;
+window.loadAdminData =
+  loadAdminData;
 
 function renderAdminCard(m) {
   const home =
-    getTeamName(m.home_team_id);
+    getTeamName(
+      m.home_team_id
+    );
 
   const away =
-    getTeamName(m.away_team_id);
+    getTeamName(
+      m.away_team_id
+    );
 
   const hs =
     Number(m.home_score) || 0;
@@ -243,11 +271,7 @@ function renderAdminCard(m) {
     ];
 
   const matchGoals =
-    (
-      typeof allGoals !== 'undefined'
-        ? allGoals
-        : []
-    ).filter(
+    allGoals.filter(
       g =>
         g.match_id === m.id
     );
@@ -263,15 +287,21 @@ function renderAdminCard(m) {
             .map(
               g => `
             <div class="flex justify-between items-center bg-slate-900/80 rounded-lg px-3 py-2 text-sm">
+
               <span>
                 ${g.player_name}
                 ${
                   g.minute
-                    ? " " + g.minute + "'"
+                    ? " " +
+                      g.minute +
+                      "'"
                     : ''
                 }
+
                 <span class="text-slate-500 text-xs">
-                  (${getTeamName(g.team_id)})
+                  (${getTeamName(
+                    g.team_id
+                  )})
                 </span>
               </span>
 
@@ -290,6 +320,7 @@ function renderAdminCard(m) {
                 class="text-red-400 font-bold text-xs px-2">
                 ✕
               </button>
+
             </div>`
             )
             .join('')}
@@ -297,11 +328,7 @@ function renderAdminCard(m) {
       : '';
 
   const matchCards =
-    (
-      typeof allCards !== 'undefined'
-        ? allCards
-        : []
-    ).filter(
+    allCards.filter(
       c =>
         c.match_id === m.id
     );
@@ -309,6 +336,7 @@ function renderAdminCard(m) {
   const cardsList =
     matchCards.length
       ? `<div class="mt-3 space-y-1">
+
           <p class="text-[11px] font-bold text-slate-500 uppercase">
             Cards
           </p>
@@ -317,16 +345,21 @@ function renderAdminCard(m) {
             .map(
               c => `
             <div class="flex justify-between items-center bg-slate-900/80 rounded-lg px-3 py-2 text-sm">
+
               <span>
                 ${
                   c.card_type === 'red'
                     ? '🟥'
                     : '🟨'
                 }
+
                 ${c.player_name}
+
                 ${
                   c.minute
-                    ? " " + c.minute + "'"
+                    ? " " +
+                      c.minute +
+                      "'"
                     : ''
                 }
               </span>
@@ -337,9 +370,11 @@ function renderAdminCard(m) {
                 class="text-red-400 font-bold text-xs px-2">
                 ✕
               </button>
+
             </div>`
             )
             .join('')}
+
         </div>`
       : '';
 
@@ -371,6 +406,7 @@ function renderAdminCard(m) {
           }
 
           · ${ph} – ${pa}
+
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-2">
@@ -402,6 +438,7 @@ function renderAdminCard(m) {
               </button>
 
             </div>
+
           </div>
 
           <div class="text-center">
@@ -431,6 +468,7 @@ function renderAdminCard(m) {
               </button>
 
             </div>
+
           </div>
 
         </div>
@@ -465,31 +503,33 @@ function renderAdminCard(m) {
       </div>`;
   }
 
-  const canStartExtraTime =
-    knockout &&
-    tied &&
-    !pensOn &&
-    m.status === 'live';
+  /*
+   * State-specific controls.
+   *
+   * Upcoming:
+   *   Start
+   *
+   * Live:
+   *   Half-time
+   *   Finish, or Extra Time for a tied knockout
+   *
+   * Half-time:
+   *   Resume LIVE
+   *
+   * Extra Time:
+   *   Finish if one side leads
+   *   Penalties if still tied
+   *
+   * Penalties / Finished / Walkover:
+   *   No normal match-status controls.
+   */
+  let statusControls =
+    '';
 
-  const canGoToPens =
-    knockout &&
-    tied &&
-    m.status === 'extra_time' &&
-    !pensOn;
-
-  const canFinishImmediately =
-    !(
-      knockout &&
-      tied &&
-      (
-        m.status === 'live' ||
-        m.status === 'half_time'
-      )
-    );
-
-  let statusControls = '';
-
-  if (m.status === 'not_started') {
+  if (
+    m.status ===
+    'not_started'
+  ) {
     statusControls = `
       <button
         type="button"
@@ -497,81 +537,73 @@ function renderAdminCard(m) {
         class="col-span-2 py-4 rounded-xl bg-red-600 text-white font-bold text-base">
         ▶ Start match
       </button>`;
-  } else {
-    statusControls = `
+  }
 
+  else if (
+    m.status ===
+    'live'
+  ) {
+    statusControls = `
       <button
         type="button"
         onclick="updateStatus('${m.id}', 'half_time')"
-        class="py-4 rounded-xl font-bold text-sm ${
-          m.status === 'half_time'
-            ? 'bg-orange-500 text-white'
-            : 'bg-slate-700 text-slate-200'
-        }">
+        class="py-4 rounded-xl bg-orange-500 text-white font-bold text-sm">
         Half-time
       </button>
 
       ${
-        canStartExtraTime
+        knockout && tied
           ? `<button
               type="button"
               onclick="startExtraTime('${m.id}')"
               class="py-4 rounded-xl bg-purple-600 text-white font-bold text-sm">
               Extra time
             </button>`
-          : canGoToPens
-            ? `<button
-                type="button"
-                onclick="startPens('${m.id}')"
-                class="py-4 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm">
-                End ET → Pens
-              </button>`
-            : `<button
-                type="button"
-                onclick="updateStatus('${m.id}', 'finished')"
-                ${
-                  canFinishImmediately
-                    ? ''
-                    : 'disabled'
-                }
-                class="py-4 rounded-xl font-bold text-sm ${
-                  canFinishImmediately
-                    ? 'bg-green-600 text-white'
-                    : 'bg-slate-700 text-slate-500 opacity-50 cursor-not-allowed'
-                }">
-                Finish
-              </button>`
+          : `<button
+              type="button"
+              onclick="updateStatus('${m.id}', 'finished')"
+              class="py-4 rounded-xl bg-green-600 text-white font-bold text-sm">
+              Finish
+            </button>`
       }
+    `;
+  }
 
-      ${
-        m.status === 'extra_time'
-          ? tied
-            ? `<button
-                type="button"
-                onclick="startPens('${m.id}')"
-                class="col-span-2 py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm">
-                End extra time → Penalties
-              </button>`
-            : `<button
-                type="button"
-                onclick="updateStatus('${m.id}', 'finished')"
-                class="col-span-2 py-3 rounded-xl bg-green-600 text-white font-bold text-sm">
-                Finish after extra time
-              </button>`
-          : ''
-      }
-
+  else if (
+    m.status ===
+    'half_time'
+  ) {
+    statusControls = `
       <button
         type="button"
         onclick="updateStatus('${m.id}', 'live')"
-        class="col-span-2 py-3 rounded-xl bg-slate-700 text-sm font-semibold ${
-          m.status === 'live'
-            ? 'ring-2 ring-red-500'
-            : ''
-        }">
-        Back to LIVE
-      </button>
-    `;
+        class="col-span-2 py-4 rounded-xl bg-red-600 text-white font-bold text-base">
+        ▶ Resume LIVE
+      </button>`;
+  }
+
+  else if (
+    m.status ===
+    'extra_time'
+  ) {
+    statusControls =
+      tied
+        ? `
+          <button
+            type="button"
+            onclick="startPens('${m.id}')"
+            class="col-span-2 py-4 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm">
+            End extra time → Penalties
+          </button>
+        `
+        : `
+          <button
+            type="button"
+            onclick="updateStatus('${m.id}', 'finished')"
+            class="col-span-2 py-4 rounded-xl bg-green-600 text-white font-bold text-sm">
+            Finish after extra time
+          </button>
+        `;
   }
 
   return `
@@ -610,7 +642,6 @@ function renderAdminCard(m) {
           <p class="font-bold text-base truncate leading-tight">
             ${away}
           </p>
-
         </div>
 
         <span class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full ${st[1]}">
@@ -628,9 +659,19 @@ function renderAdminCard(m) {
       }
 
       ${
-        m.status === 'extra_time'
+        m.status ===
+        'extra_time'
           ? `<p class="text-center text-[11px] text-purple-400 font-bold -mt-2">
               EXTRA TIME
+            </p>`
+          : ''
+      }
+
+      ${
+        m.status ===
+        'penalties'
+          ? `<p class="text-center text-[11px] text-amber-400 font-bold -mt-2">
+              PENALTY SHOOTOUT
             </p>`
           : ''
       }
@@ -704,12 +745,18 @@ function renderAdminCard(m) {
           onclick="${
             pensOn
               ? 'void(0)'
-              : canGoToPens
+              : m.status === 'extra_time' &&
+                tied
                 ? `startPens('${m.id}')`
                 : 'void(0)'
           }"
           class="py-3.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold text-sm ${
-            pensOn || !canGoToPens
+            pensOn ||
+            !(
+              m.status ===
+                'extra_time' &&
+              tied
+            )
               ? 'opacity-50'
               : ''
           }">
@@ -720,9 +767,13 @@ function renderAdminCard(m) {
 
       ${pensUI}
 
-      <div class="grid grid-cols-2 gap-2">
-        ${statusControls}
-      </div>
+      ${
+        statusControls
+          ? `<div class="grid grid-cols-2 gap-2">
+              ${statusControls}
+            </div>`
+          : ''
+      }
 
       ${goalsList}
       ${cardsList}
@@ -749,9 +800,14 @@ function renderAdminCard(m) {
 }
 
 window.openGoalDialog =
-  function(matchId, side) {
+  function(
+    matchId,
+    side
+  ) {
     const player =
-      prompt('Player name who scored?');
+      prompt(
+        'Player name who scored?'
+      );
 
     if (
       !player ||
@@ -768,7 +824,10 @@ window.openGoalDialog =
 
     const minute =
       minuteStr
-        ? parseInt(minuteStr, 10)
+        ? parseInt(
+            minuteStr,
+            10
+          )
         : null;
 
     addGoalAndScore(
@@ -793,7 +852,10 @@ async function addGoalAndScore(
     .select(
       'status, home_score, away_score, home_team_id, away_team_id'
     )
-    .eq('id', matchId)
+    .eq(
+      'id',
+      matchId
+    )
     .single();
 
   if (
@@ -845,16 +907,18 @@ async function addGoalAndScore(
 
   const scoreUpdate =
     side === 'home'
-      ? { home_score: current }
-      : { away_score: current };
+      ? {
+          home_score:
+            current
+        }
+      : {
+          away_score:
+            current
+        };
 
-  /*
-   * IMPORTANT:
-   * Preserve EXTRA TIME status when a goal is
-   * scored during extra time.
-   */
   scoreUpdate.status =
-    m.status === 'extra_time'
+    m.status ===
+      'extra_time'
       ? 'extra_time'
       : 'live';
 
@@ -865,7 +929,9 @@ async function addGoalAndScore(
     error: scoreError
   } = await sb
     .from('matches')
-    .update(scoreUpdate)
+    .update(
+      scoreUpdate
+    )
     .eq(
       'id',
       matchId
@@ -936,7 +1002,9 @@ window.deleteGoal =
       );
 
     if (delError) {
-      alert(delError.message);
+      alert(
+        delError.message
+      );
       return;
     }
 
@@ -958,15 +1026,23 @@ window.deleteGoal =
 
     const scoreUpdate =
       side === 'home'
-        ? { home_score: current }
-        : { away_score: current };
+        ? {
+            home_score:
+              current
+          }
+        : {
+            away_score:
+              current
+          };
 
     scoreUpdate.updated_at =
       new Date().toISOString();
 
     await sb
       .from('matches')
-      .update(scoreUpdate)
+      .update(
+        scoreUpdate
+      )
       .eq(
         'id',
         matchId
@@ -985,7 +1061,9 @@ window.changeScoreOnly =
       side !== 'home' &&
       side !== 'away'
     ) {
-      alert('Invalid side.');
+      alert(
+        'Invalid side.'
+      );
       return;
     }
 
@@ -993,7 +1071,9 @@ window.changeScoreOnly =
       delta !== 1 &&
       delta !== -1
     ) {
-      alert('Invalid score change.');
+      alert(
+        'Invalid score change.'
+      );
       return;
     }
 
@@ -1023,7 +1103,9 @@ window.changeScoreOnly =
       return;
     }
 
-    if (hasPenaltyData(m)) {
+    if (
+      hasPenaltyData(m)
+    ) {
       alert(
         'Match is in the penalty phase. Change penalty scores there.'
       );
@@ -1070,11 +1152,17 @@ window.changeScoreOnly =
 
     const update =
       side === 'home'
-        ? { home_score: current }
-        : { away_score: current };
+        ? {
+            home_score:
+              current
+          }
+        : {
+            away_score:
+              current
+          };
 
     /*
-     * Preserve the current match phase.
+     * Preserve the current phase.
      */
     update.status =
       m.status;
@@ -1093,7 +1181,9 @@ window.changeScoreOnly =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     }
 
     loadAdminData();
@@ -1128,7 +1218,10 @@ window.openCardDialog =
 
     const minute =
       minuteStr
-        ? parseInt(minuteStr, 10)
+        ? parseInt(
+            minuteStr,
+            10
+          )
         : null;
 
     const {
@@ -1147,14 +1240,18 @@ window.openCardDialog =
       });
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
   };
 
 window.deleteCard =
-  async function(cardId) {
+  async function(
+    cardId
+  ) {
     if (
       !confirm(
         'Remove this card?'
@@ -1174,14 +1271,18 @@ window.deleteCard =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
   };
 
 window.startExtraTime =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     const {
       data: m,
       error: loadError
@@ -1212,28 +1313,36 @@ window.startExtraTime =
     const as =
       Number(m.away_score) || 0;
 
-    if (!isKnockoutMatch(m)) {
+    if (
+      !isKnockoutMatch(m)
+    ) {
       alert(
         'Extra time is only available for knockout matches.'
       );
       return;
     }
 
-    if (hs !== as) {
+    if (
+      hs !== as
+    ) {
       alert(
         'Extra time can only start when the match is level after normal time.'
       );
       return;
     }
 
-    if (m.status !== 'live') {
+    if (
+      m.status !== 'live'
+    ) {
       alert(
-        'Extra time can only be started from a live match after normal time.'
+        'Extra time can only be started from LIVE after normal time.'
       );
       return;
     }
 
-    if (hasPenaltyData(m)) {
+    if (
+      hasPenaltyData(m)
+    ) {
       alert(
         'Penalty data already exists. Clear penalties first.'
       );
@@ -1267,7 +1376,9 @@ window.startExtraTime =
   };
 
 window.startPens =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     const {
       data: m,
       error: loadError
@@ -1298,21 +1409,28 @@ window.startPens =
     const as =
       Number(m.away_score) || 0;
 
-    if (!isKnockoutMatch(m)) {
+    if (
+      !isKnockoutMatch(m)
+    ) {
       alert(
         'Penalties are only available for knockout matches.'
       );
       return;
     }
 
-    if (hs !== as) {
+    if (
+      hs !== as
+    ) {
       alert(
         'Penalties can only start when the match is level.'
       );
       return;
     }
 
-    if (m.status !== 'extra_time') {
+    if (
+      m.status !==
+      'extra_time'
+    ) {
       alert(
         'Complete extra time before starting penalties.'
       );
@@ -1343,14 +1461,18 @@ window.startPens =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
   };
 
 window.enterSuddenDeath =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     const {
       data: m,
       error: loadError
@@ -1384,7 +1506,8 @@ window.enterSuddenDeath =
       Number(m.pen_away) || 0;
 
     if (
-      m.status !== 'penalties' ||
+      m.status !==
+        'penalties' ||
       !m.pens_on ||
       m.pens_sudden ||
       ph !== 5 ||
@@ -1477,7 +1600,8 @@ window.changePen =
     }
 
     if (
-      m.status !== 'penalties' ||
+      m.status !==
+        'penalties' ||
       !m.pens_on
     ) {
       alert(
@@ -1537,7 +1661,9 @@ window.changePen =
     let nextStatus =
       m.status;
 
-    if (m.pens_sudden) {
+    if (
+      m.pens_sudden
+    ) {
       nextStatus =
         ph !== pa
           ? 'finished'
@@ -1580,7 +1706,9 @@ window.changePen =
   };
 
 window.clearPens =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     if (
       !confirm(
         'Clear penalty scores and return this match to the end of extra time?'
@@ -1617,7 +1745,8 @@ window.clearPens =
 
     if (
       !m.pens_on &&
-      m.status !== 'penalties'
+      m.status !==
+        'penalties'
     ) {
       alert(
         'No penalty phase is active.'
@@ -1651,7 +1780,9 @@ window.clearPens =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
@@ -1698,51 +1829,106 @@ window.updateStatus =
     const knockout =
       isKnockoutMatch(m);
 
+    /*
+     * Explicitly enforce the state machine.
+     */
+
     if (
-      status === 'finished' &&
-      knockout &&
-      tied &&
-      !m.pens_on &&
-      m.status !== 'extra_time'
+      status === 'live'
     ) {
-      alert(
-        'This knockout match is tied. Start extra time before finishing the match.'
-      );
-      return;
+      if (
+        m.status !==
+          'not_started' &&
+        m.status !==
+          'half_time'
+      ) {
+        alert(
+          'A match can return to LIVE only from Upcoming or Half-time.'
+        );
+        return;
+      }
     }
 
     if (
-      status === 'finished' &&
-      knockout &&
-      tied &&
-      m.status === 'extra_time'
+      status ===
+      'half_time'
     ) {
-      alert(
-        'The match is still tied after extra time. Start penalties.'
-      );
-      return;
+      if (
+        m.status !==
+        'live'
+      ) {
+        alert(
+          'Half-time can only be set from LIVE.'
+        );
+        return;
+      }
     }
 
     if (
-      status === 'finished' &&
-      m.status === 'penalties'
+      status ===
+        'finished'
     ) {
-      alert(
-        'Complete the penalty shootout or correct it using Clear pens.'
-      );
-      return;
+      if (
+        m.status ===
+        'penalties'
+      ) {
+        alert(
+          'Complete the penalty shootout first.'
+        );
+        return;
+      }
+
+      if (
+        m.status !==
+          'live' &&
+        m.status !==
+          'extra_time'
+      ) {
+        alert(
+          'A match can only be finished from LIVE or EXTRA TIME.'
+        );
+        return;
+      }
+
+      if (
+        knockout &&
+        tied &&
+        m.status !==
+          'extra_time'
+      ) {
+        alert(
+          'This knockout match is tied. Start extra time before finishing the match.'
+        );
+        return;
+      }
+
+      if (
+        knockout &&
+        tied &&
+        m.status ===
+          'extra_time'
+      ) {
+        alert(
+          'The match is still tied after extra time. Start penalties.'
+        );
+        return;
+      }
     }
 
+    /*
+     * Extra Time must use startExtraTime().
+     * Penalties must use startPens().
+     * This prevents arbitrary status injection from
+     * the normal status control.
+     */
     if (
-      status === 'half_time' &&
-      (
-        m.status === 'finished' ||
-        m.status === 'walkover' ||
-        m.status === 'penalties'
-      )
+      status ===
+        'extra_time' ||
+      status ===
+        'penalties'
     ) {
       alert(
-        'This match cannot return to half-time from its current state.'
+        'Use the dedicated Extra Time or Penalties control.'
       );
       return;
     }
@@ -1762,14 +1948,18 @@ window.updateStatus =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
   };
 
 window.resetScore =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     if (
       !confirm(
         'Reset this match?\n\n' +
@@ -1831,7 +2021,9 @@ window.resetScore =
   };
 
 window.deleteMatch =
-  async function(matchId) {
+  async function(
+    matchId
+  ) {
     if (
       !confirm(
         'Delete this match and all its goals/cards?'
@@ -1869,14 +2061,18 @@ window.deleteMatch =
       );
 
     if (error) {
-      alert(error.message);
+      alert(
+        error.message
+      );
     } else {
       loadAdminData();
     }
   };
 
 document
-  .getElementById('addMatchBtn')
+  .getElementById(
+    'addMatchBtn'
+  )
   ?.addEventListener(
     'click',
     async () => {
@@ -1932,7 +2128,9 @@ document
         });
 
       if (error) {
-        alert(error.message);
+        alert(
+          error.message
+        );
       } else {
         var g =
           document.getElementById(
@@ -1941,12 +2139,14 @@ document
 
         if (g) {
           if (
-            g.tagName === 'SELECT'
+            g.tagName ===
+            'SELECT'
           ) {
             g.selectedIndex =
               0;
           } else {
-            g.value = '';
+            g.value =
+              '';
           }
         }
 
