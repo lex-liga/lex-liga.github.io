@@ -274,6 +274,29 @@ function computeStandings() {
       return;
     }
 
+    /*
+     * ONLY group-stage matches count toward group standings.
+     *
+     * A match is valid for standings only when:
+     *   1. group_name exists
+     *   2. group_name matches the home team's group
+     *   3. group_name matches the away team's group
+     *
+     * This prevents knockout matches such as:
+     *   Quarter-finals
+     *   Semi-finals
+     *   Final
+     *
+     * from affecting P, W, D, L, GF, GA, GD or Points.
+     */
+    if (
+      !m.group_name ||
+      m.group_name !== home.group ||
+      m.group_name !== away.group
+    ) {
+      return;
+    }
+
     const hs = Number(m.home_score) || 0;
     const as = Number(m.away_score) || 0;
 
