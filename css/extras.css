@@ -20,6 +20,7 @@
   font-size: 1.25rem;
   line-height: 1;
 }
+
 .nav-drawer {
   display: none;
   position: fixed;
@@ -28,7 +29,11 @@
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
 }
-.nav-drawer.open { display: block; }
+
+.nav-drawer.open {
+  display: block;
+}
+
 .nav-drawer-panel {
   position: absolute;
   top: 0;
@@ -43,6 +48,7 @@
   gap: 0.35rem;
   box-shadow: -12px 0 40px rgba(0, 0, 0, 0.4);
 }
+
 .nav-drawer-panel a {
   display: block;
   padding: 0.85rem 1rem;
@@ -52,11 +58,13 @@
   font-size: 0.95rem;
   text-decoration: none;
 }
+
 .nav-drawer-panel a:hover,
 .nav-drawer-panel a.is-active {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
 }
+
 .nav-drawer-close {
   align-self: flex-end;
   width: 40px;
@@ -75,9 +83,11 @@
   .site-nav > .sport-tabs {
     display: none !important;
   }
+
   .nav-burger {
     display: inline-flex !important;
   }
+
   .site-wordmark {
     display: inline-block !important;
     font-size: 0.85rem !important;
@@ -85,8 +95,13 @@
 }
 
 @media (min-width: 768px) {
-  .nav-burger { display: none !important; }
-  .nav-drawer { display: none !important; }
+  .nav-burger {
+    display: none !important;
+  }
+
+  .nav-drawer {
+    display: none !important;
+  }
 }
 
 /* ===== Announcement marquee ===== */
@@ -102,6 +117,7 @@
   display: flex;
   align-items: center;
 }
+
 .announce-track {
   display: inline-flex;
   align-items: center;
@@ -110,6 +126,7 @@
   will-change: transform;
   animation: announce-scroll 22s linear infinite;
 }
+
 .announce-text {
   display: inline-flex;
   align-items: center;
@@ -124,15 +141,22 @@
   line-height: 1;
   flex-shrink: 0;
 }
+
 @keyframes announce-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
+
 body.has-announce .site-header {
   top: 38px;
 }
 
-/* Sound / notify */
+/* ===== Sound / notify ===== */
 .lex-extras-controls {
   position: fixed;
   left: 0.75rem;
@@ -142,6 +166,7 @@ body.has-announce .site-header {
   flex-direction: column;
   gap: 0.4rem;
 }
+
 .lex-extra-btn {
   border: 1px solid rgba(148, 163, 184, 0.25);
   background: rgba(15, 23, 42, 0.92);
@@ -153,6 +178,7 @@ body.has-announce .site-header {
   cursor: pointer;
   backdrop-filter: blur(8px);
 }
+
 .lex-extra-btn.is-on {
   color: #4ade80;
   border-color: rgba(34, 197, 94, 0.45);
@@ -179,6 +205,7 @@ body.has-announce .site-header {
   width: 100%;
   justify-content: center;
 }
+
 .share-button:hover {
   color: #4ade80;
   border-color: rgba(34, 197, 94, 0.4);
@@ -190,11 +217,13 @@ body.has-announce .site-header {
   gap: 1rem !important;
   width: 100% !important;
 }
+
 @media (min-width: 640px) {
   .social-post-grid {
     grid-template-columns: 1fr 1fr !important;
   }
 }
+
 .social-post-grid > .social-post {
   width: 100% !important;
   min-height: 240px;
@@ -206,33 +235,49 @@ body.has-announce .site-header {
   padding: 1.35rem 1.25rem 1.15rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
   background:
-    radial-gradient(ellipse 70% 80% at 0% 0%, rgba(34, 197, 94, 0.12), transparent 55%),
-    radial-gradient(ellipse 50% 60% at 100% 100%, rgba(29, 185, 84, 0.08), transparent 50%),
+    radial-gradient(
+      ellipse 70% 80% at 0% 0%,
+      rgba(34, 197, 94, 0.12),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 60% at 100% 100%,
+      rgba(29, 185, 84, 0.08),
+      transparent 50%
+    ),
     rgba(15, 23, 42, 0.85);
 }
-.playlist-section .section-eyebrow { margin-bottom: 0.25rem; }
+
+.playlist-section .section-eyebrow {
+  margin-bottom: 0.25rem;
+}
+
 .playlist-section h2 {
   font-size: 1.25rem;
   font-weight: 800;
   margin-bottom: 0.35rem;
 }
+
 .playlist-section .playlist-desc {
   font-size: 0.875rem;
   color: #94a3b8;
   margin-bottom: 1rem;
   line-height: 1.45;
 }
+
 .playlist-embed {
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.15);
 }
+
 .playlist-embed iframe {
   display: block;
   width: 100%;
   border: 0;
   border-radius: 12px;
 }
+
 .playlist-note {
   margin-top: 0.65rem;
   font-size: 0.7rem;
@@ -247,6 +292,7 @@ body.has-announce .site-header {
   overflow: hidden;
   user-select: none;
 }
+
 .sport-wm-inner {
   position: absolute;
   inset: -10% -18%;
@@ -256,6 +302,7 @@ body.has-announce .site-header {
   gap: clamp(0.35rem, 1.8vw, 1rem);
   transform: rotate(-12deg);
 }
+
 .sport-wm-row {
   font-family: Inter, system-ui, sans-serif;
   font-size: clamp(2.5rem, 10vw, 6rem);
@@ -268,19 +315,23 @@ body.has-announce .site-header {
   background: none;
   -webkit-text-fill-color: rgba(148, 163, 184, 0.09);
 }
+
 .sport-wm-row:nth-child(odd) {
   transform: translateX(-6%);
   color: rgba(34, 197, 94, 0.1);
   -webkit-text-fill-color: rgba(34, 197, 94, 0.1);
 }
+
 .sport-wm-row:nth-child(even) {
   transform: translateX(8%);
 }
+
 .sport-wm-row:nth-child(3n) {
   transform: translateX(-12%);
   color: rgba(56, 189, 248, 0.08);
   -webkit-text-fill-color: rgba(56, 189, 248, 0.08);
 }
+
 .sport-wm-row:nth-child(4n) {
   transform: translateX(14%);
 }
@@ -303,6 +354,7 @@ body.has-sport-wm .site-footer {
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(6px);
 }
+
 .pwa-prompt-card {
   position: relative;
   width: min(100%, 380px);
@@ -313,6 +365,7 @@ body.has-sport-wm .site-footer {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
   text-align: center;
 }
+
 .pwa-prompt-x {
   position: absolute;
   top: 0.65rem;
@@ -326,28 +379,33 @@ body.has-sport-wm .site-footer {
   font-size: 1rem;
   cursor: pointer;
 }
+
 .pwa-prompt-icon {
   font-size: 2.25rem;
   margin-bottom: 0.5rem;
 }
+
 .pwa-prompt-card h2 {
   font-size: 1.15rem;
   font-weight: 800;
   color: #f8fafc;
   margin: 0 0 0.5rem;
 }
+
 .pwa-prompt-body {
   font-size: 0.875rem;
   color: #94a3b8;
   line-height: 1.45;
   margin: 0 0 1.25rem;
 }
+
 .pwa-prompt-actions {
   display: flex;
   gap: 0.65rem;
   justify-content: center;
   flex-wrap: wrap;
 }
+
 .pwa-prompt-primary {
   border: none;
   border-radius: 0.75rem;
@@ -358,6 +416,7 @@ body.has-sport-wm .site-footer {
   color: #0f172a;
   cursor: pointer;
 }
+
 .pwa-prompt-secondary {
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 0.75rem;
@@ -369,8 +428,51 @@ body.has-sport-wm .site-footer {
   cursor: pointer;
 }
 
+/* ===== Badminton status badges ===== */
+.status-live,
+.status-finished,
+.status-not-started,
+.status-walkover {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.32rem 0.62rem;
+  letter-spacing: 0.02em;
+}
+
+/* Live */
+.status-live {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+/* Finished */
+.status-finished {
+  background: #475569 !important;
+  color: #ffffff !important;
+}
+
+/* Upcoming */
+.status-not-started {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Walkover */
+.status-walkover {
+  background: #d97706 !important;
+  color: #ffffff !important;
+}
+
 /* Half-time badge on live cards */
-.status-half_time, .status-badge.status-half_time {
+.status-half_time,
+.status-badge.status-half_time {
   background: #f97316 !important;
   color: #fff !important;
 }
