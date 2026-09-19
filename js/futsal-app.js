@@ -229,13 +229,8 @@ function renderMatchCard(match) {
 }
 
 /*
- * Team grouping is now driven by the actual group_name
+ * Team grouping is driven by the actual group_name
  * stored on each team.
- *
- * Official tournament structure currently uses:
- * Group A, B, C, D and E.
- *
- * No team-name pattern matching is used anymore.
  */
 function teamGroupLabel(t) {
   const group =
@@ -288,15 +283,7 @@ function computeStandings() {
     }
 
     /*
-     * ONLY group-stage matches count toward group standings.
-     *
-     * A match is valid for standings only when:
-     *   1. group_name exists
-     *   2. group_name matches the home team's group
-     *   3. group_name matches the away team's group
-     *
-     * This prevents knockout matches from affecting
-     * P, W, D, L, GF, GA, GD or Points.
+     * ONLY group-stage matches count toward standings.
      */
     if (
       !m.group_name ||
@@ -306,8 +293,11 @@ function computeStandings() {
       return;
     }
 
-    const hs = Number(m.home_score) || 0;
-    const as = Number(m.away_score) || 0;
+    const hs =
+      Number(m.home_score) || 0;
+
+    const as =
+      Number(m.away_score) || 0;
 
     home.played++;
     away.played++;
@@ -318,7 +308,8 @@ function computeStandings() {
     away.gf += as;
     away.ga += hs;
 
-    const side = matchWinnerSide(m);
+    const side =
+      matchWinnerSide(m);
 
     if (side === 'home') {
       home.won++;
@@ -339,7 +330,10 @@ function computeStandings() {
   return Object.values(table);
 }
 
-function headToHeadWinner(teamA, teamB) {
+function headToHeadWinner(
+  teamA,
+  teamB
+) {
   if (
     !teamA ||
     !teamB ||
@@ -349,28 +343,36 @@ function headToHeadWinner(teamA, teamB) {
     return null;
   }
 
-  const matches = allMatches.filter(m => {
-    if (
-      m.status !== 'finished' &&
-      m.status !== 'walkover'
-    ) {
-      return false;
-    }
+  const matches =
+    allMatches.filter(m => {
+      if (
+        m.status !== 'finished' &&
+        m.status !== 'walkover'
+      ) {
+        return false;
+      }
 
-    if (m.group_name !== teamA.group) {
-      return false;
-    }
+      if (
+        m.group_name !==
+        teamA.group
+      ) {
+        return false;
+      }
 
-    const aIsHome =
-      m.home_team_id === teamA.id &&
-      m.away_team_id === teamB.id;
+      const aIsHome =
+        m.home_team_id ===
+          teamA.id &&
+        m.away_team_id ===
+          teamB.id;
 
-    const aIsAway =
-      m.home_team_id === teamB.id &&
-      m.away_team_id === teamA.id;
+      const aIsAway =
+        m.home_team_id ===
+          teamB.id &&
+        m.away_team_id ===
+          teamA.id;
 
-    return aIsHome || aIsAway;
-  });
+      return aIsHome || aIsAway;
+    });
 
   if (matches.length !== 1) {
     return null;
@@ -378,14 +380,20 @@ function headToHeadWinner(teamA, teamB) {
 
   const m = matches[0];
 
-  const hs = Number(m.home_score) || 0;
-  const as = Number(m.away_score) || 0;
+  const hs =
+    Number(m.home_score) || 0;
+
+  const as =
+    Number(m.away_score) || 0;
 
   if (hs === as) {
     return null;
   }
 
-  if (m.home_team_id === teamA.id) {
+  if (
+    m.home_team_id ===
+    teamA.id
+  ) {
     return hs > as
       ? teamA.id
       : teamB.id;
@@ -398,13 +406,18 @@ function headToHeadWinner(teamA, teamB) {
 
 function renderStandings(rows) {
   if (!rows.length) {
-    return '<p class="empty-state">No standings yet</p>';
+    return (
+      '<p class="empty-state">' +
+      'No standings yet' +
+      '</p>'
+    );
   }
 
   const byGroup = {};
 
   rows.forEach(r => {
-    const g = r.group || 'Other';
+    const g =
+      r.group || 'Other';
 
     if (!byGroup[g]) {
       byGroup[g] = [];
@@ -432,104 +445,152 @@ function renderStandings(rows) {
       .sort()
   );
 
-  const sortRows = list => {
-    const rows = list.slice();
+  const sortRows =
+    list => {
+      const rows =
+        list.slice();
 
-    /*
-     * Aggregate tiebreaks:
-     * Points → Goal Difference → Goals Scored
-     * → Goals Conceded → Head-to-Head.
-     */
-    rows.sort((a, b) => {
-      if (b.pts !== a.pts) {
-        return b.pts - a.pts;
-      }
+      rows.sort(
+        (a, b) => {
+          if (
+            b.pts !==
+            a.pts
+          ) {
+            return (
+              b.pts -
+              a.pts
+            );
+          }
 
-      const gdA = a.gf - a.ga;
-      const gdB = b.gf - b.ga;
+          const gdA =
+            a.gf - a.ga;
 
-      if (gdB !== gdA) {
-        return gdB - gdA;
-      }
+          const gdB =
+            b.gf - b.ga;
 
-      if (b.gf !== a.gf) {
-        return b.gf - a.gf;
-      }
+          if (
+            gdB !== gdA
+          ) {
+            return (
+              gdB - gdA
+            );
+          }
 
-      if (a.ga !== b.ga) {
-        return a.ga - b.ga;
-      }
+          if (
+            b.gf !== a.gf
+          ) {
+            return (
+              b.gf -
+              a.gf
+            );
+          }
 
-      return a.name.localeCompare(b.name);
-    });
+          if (
+            a.ga !== b.ga
+          ) {
+            return (
+              a.ga -
+              b.ga
+            );
+          }
 
-    const tieGroups = {};
+          return a.name.localeCompare(
+            b.name
+          );
+        }
+      );
 
-    rows.forEach(row => {
-      const gd = row.gf - row.ga;
+      const tieGroups =
+        {};
 
-      const key = [
-        row.pts,
-        gd,
-        row.gf,
-        row.ga
-      ].join('|');
+      rows.forEach(
+        row => {
+          const gd =
+            row.gf -
+            row.ga;
 
-      if (!tieGroups[key]) {
-        tieGroups[key] = [];
-      }
+          const key = [
+            row.pts,
+            gd,
+            row.gf,
+            row.ga
+          ].join('|');
 
-      tieGroups[key].push(row);
-    });
+          if (
+            !tieGroups[key]
+          ) {
+            tieGroups[key] =
+              [];
+          }
 
-    Object.keys(tieGroups).forEach(key => {
-      const tied = tieGroups[key];
+          tieGroups[key].push(
+            row
+          );
+        }
+      );
 
-      if (tied.length !== 2) {
-        return;
-      }
+      Object.keys(
+        tieGroups
+      ).forEach(
+        key => {
+          const tied =
+            tieGroups[key];
 
-      const winnerId =
-        headToHeadWinner(
-          tied[0],
-          tied[1]
-        );
+          if (
+            tied.length !==
+            2
+          ) {
+            return;
+          }
 
-      if (
-        !winnerId ||
-        tied[0].id === winnerId
-      ) {
-        return;
-      }
+          const winnerId =
+            headToHeadWinner(
+              tied[0],
+              tied[1]
+            );
 
-      const firstIndex =
-        rows.findIndex(
-          row => row.id === tied[0].id
-        );
+          if (
+            !winnerId ||
+            tied[0].id ===
+              winnerId
+          ) {
+            return;
+          }
 
-      const secondIndex =
-        rows.findIndex(
-          row => row.id === tied[1].id
-        );
+          const firstIndex =
+            rows.findIndex(
+              row =>
+                row.id ===
+                tied[0].id
+            );
 
-      if (
-        firstIndex < 0 ||
-        secondIndex < 0
-      ) {
-        return;
-      }
+          const secondIndex =
+            rows.findIndex(
+              row =>
+                row.id ===
+                tied[1].id
+            );
 
-      const temp = rows[firstIndex];
+          if (
+            firstIndex < 0 ||
+            secondIndex < 0
+          ) {
+            return;
+          }
 
-      rows[firstIndex] =
-        rows[secondIndex];
+          const temp =
+            rows[firstIndex];
 
-      rows[secondIndex] =
-        temp;
-    });
+          rows[firstIndex] =
+            rows[secondIndex];
 
-    return rows;
-  };
+          rows[secondIndex] =
+            temp;
+        }
+      );
+
+      return rows;
+    };
 
   return order
     .filter(
@@ -537,94 +598,104 @@ function renderStandings(rows) {
         byGroup[g] &&
         byGroup[g].length
     )
-    .map(g => {
-      const list = sortRows(byGroup[g]);
+    .map(
+      g => {
+        const list =
+          sortRows(
+            byGroup[g]
+          );
 
-      return (
-        '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
+        return (
+          '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
 
-          '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' +
-            escapeHtml(g) +
-          '</div>' +
+            '<div class="px-4 py-2.5 bg-slate-800/80 text-sm font-extrabold text-green-400">' +
+              escapeHtml(g) +
+            '</div>' +
 
-          '<div class="overflow-x-auto">' +
+            '<div class="overflow-x-auto">' +
 
-            '<table class="w-full text-sm">' +
+              '<table class="w-full text-sm">' +
 
-              '<thead>' +
-                '<tr class="text-slate-500 text-xs">' +
+                '<thead>' +
+                  '<tr class="text-slate-500 text-xs">' +
 
-                  '<th class="text-left p-2">#</th>' +
-                  '<th class="text-left p-2">Team</th>' +
-                  '<th class="p-2">P</th>' +
-                  '<th class="p-2">W</th>' +
-                  '<th class="p-2">D</th>' +
-                  '<th class="p-2">L</th>' +
-                  '<th class="p-2">GF</th>' +
-                  '<th class="p-2">GA</th>' +
-                  '<th class="p-2">GD</th>' +
-                  '<th class="p-2">Pts</th>' +
+                    '<th class="text-left p-2">#</th>' +
+                    '<th class="text-left p-2">Team</th>' +
+                    '<th class="p-2">P</th>' +
+                    '<th class="p-2">W</th>' +
+                    '<th class="p-2">D</th>' +
+                    '<th class="p-2">L</th>' +
+                    '<th class="p-2">GF</th>' +
+                    '<th class="p-2">GA</th>' +
+                    '<th class="p-2">GD</th>' +
+                    '<th class="p-2">Pts</th>' +
 
-                '</tr>' +
-              '</thead>' +
+                  '</tr>' +
+                '</thead>' +
 
-              '<tbody>' +
+                '<tbody>' +
 
-                list.map((r, i) =>
-                  '<tr class="border-t border-slate-800">' +
+                  list
+                    .map(
+                      (r, i) =>
+                        '<tr class="border-t border-slate-800">' +
 
-                    '<td class="p-2 text-slate-500">' +
-                      (i + 1) +
-                    '</td>' +
+                          '<td class="p-2 text-slate-500">' +
+                            (i + 1) +
+                          '</td>' +
 
-                    '<td class="p-2 font-semibold">' +
-                      escapeHtml(r.name) +
-                    '</td>' +
+                          '<td class="p-2 font-semibold">' +
+                            escapeHtml(
+                              r.name
+                            ) +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.played +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.played +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.won +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.won +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.drawn +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.drawn +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.lost +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.lost +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.gf +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.gf +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      r.ga +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            r.ga +
+                          '</td>' +
 
-                    '<td class="p-2 text-center">' +
-                      (r.gf - r.ga) +
-                    '</td>' +
+                          '<td class="p-2 text-center">' +
+                            (r.gf - r.ga) +
+                          '</td>' +
 
-                    '<td class="p-2 text-center font-bold text-green-400">' +
-                      r.pts +
-                    '</td>' +
+                          '<td class="p-2 text-center font-bold text-green-400">' +
+                            r.pts +
+                          '</td>' +
 
-                  '</tr>'
-                ).join('') +
+                        '</tr>'
+                    )
+                    .join('') +
 
-              '</tbody>' +
+                '</tbody>' +
 
-            '</table>' +
+              '</table>' +
 
-          '</div>' +
+            '</div>' +
 
-        '</div>'
-      );
-    })
+          '</div>'
+        );
+      }
+    )
     .join('');
 }
 
@@ -639,8 +710,12 @@ function renderTopScorers() {
 
     if (!counts[key]) {
       counts[key] = {
-        name: g.player_name,
-        team: getTeamName(g.team_id),
+        name:
+          g.player_name,
+        team:
+          getTeamName(
+            g.team_id
+          ),
         n: 0
       };
     }
@@ -650,7 +725,10 @@ function renderTopScorers() {
 
   const rows =
     Object.values(counts)
-      .sort((a, b) => b.n - a.n)
+      .sort(
+        (a, b) =>
+          b.n - a.n
+      )
       .slice(0, 10);
 
   if (!rows.length) {
@@ -664,29 +742,36 @@ function renderTopScorers() {
   return (
     '<div class="divide-y divide-slate-800">' +
 
-      rows.map((r, i) =>
-        '<div class="flex justify-between px-4 py-3 text-sm">' +
+      rows
+        .map(
+          (r, i) =>
+            '<div class="flex justify-between px-4 py-3 text-sm">' +
 
-          '<span>' +
+              '<span>' +
 
-            '<span class="text-slate-500 mr-2">' +
-              (i + 1) +
-            '</span>' +
+                '<span class="text-slate-500 mr-2">' +
+                  (i + 1) +
+                '</span>' +
 
-            escapeHtml(r.name) +
+                escapeHtml(
+                  r.name
+                ) +
 
-            ' <span class="text-slate-500">(' +
-              escapeHtml(r.team) +
-            ')</span>' +
+                ' <span class="text-slate-500">(' +
+                  escapeHtml(
+                    r.team
+                  ) +
+                ')</span>' +
 
-          '</span>' +
+              '</span>' +
 
-          '<span class="font-bold text-green-400">' +
-            r.n +
-          '</span>' +
+              '<span class="font-bold text-green-400">' +
+                r.n +
+              '</span>' +
 
-        '</div>'
-      ).join('') +
+            '</div>'
+        )
+        .join('') +
 
     '</div>'
   );
@@ -694,16 +779,20 @@ function renderTopScorers() {
 
 async function loadFutsal() {
   const updated =
-    document.getElementById('lastUpdated');
+    document.getElementById(
+      'lastUpdated'
+    );
 
   if (updated) {
-    updated.textContent = 'Updating…';
+    updated.textContent =
+      'Updating…';
   }
 
   try {
     if (
       !sb ||
-      typeof sb.from !== 'function'
+      typeof sb.from !==
+        'function'
     ) {
       throw new Error(
         'Supabase not ready'
@@ -765,47 +854,89 @@ async function loadFutsal() {
           m.status === 'walkover'
       );
 
+    /*
+     * Watch ALL matches, not only currently-live
+     * matches.
+     *
+     * This allows live-extras.js to:
+     *   - detect score/penalty changes
+     *   - detect when a match stops being live
+     *   - clear its session "known live" state
+     *
+     * isLive controls whether the match receives
+     * the LIVE notification.
+     */
     if (
       typeof window.lexWatchScores ===
       'function'
     ) {
       window.lexWatchScores(
-        live.map(m => ({
-          id: m.id,
+        allMatches.map(
+          m => ({
+            id:
+              'futsal-' +
+              m.id,
 
-          label:
-            getTeamName(
-              m.home_team_id
-            ) +
-            ' vs ' +
-            getTeamName(
-              m.away_team_id
-            ),
+            label:
+              getTeamName(
+                m.home_team_id
+              ) +
+              ' vs ' +
+              getTeamName(
+                m.away_team_id
+              ),
 
-          scoreKey:
-            (m.home_score || 0) +
-            '-' +
-            (m.away_score || 0),
+            scoreKey:
+              String(
+                m.home_score || 0
+              ) +
+              '-' +
+              String(
+                m.away_score || 0
+              ) +
+              '|pens:' +
+              String(
+                m.pen_home || 0
+              ) +
+              '-' +
+              String(
+                m.pen_away || 0
+              ),
 
-          isLive: true
-        }))
+            isLive:
+              m.status ===
+                'live' ||
+              m.status ===
+                'half_time' ||
+              m.status ===
+                'extra_time' ||
+              m.status ===
+                'penalties'
+          })
+        )
       );
     }
 
-    const set = (id, html) => {
-      const el =
-        document.getElementById(id);
+    const set =
+      (id, html) => {
+        const el =
+          document.getElementById(
+            id
+          );
 
-      if (el) {
-        el.innerHTML = html;
-      }
-    };
+        if (el) {
+          el.innerHTML =
+            html;
+        }
+      };
 
     set(
       'liveMatches',
       live.length
         ? live
-            .map(renderMatchCard)
+            .map(
+              renderMatchCard
+            )
             .join('')
         : '<p class="empty-state">No live matches</p>'
     );
@@ -817,7 +948,9 @@ async function loadFutsal() {
             .slice()
             .reverse()
             .slice(0, 12)
-            .map(renderMatchCard)
+            .map(
+              renderMatchCard
+            )
             .join('')
         : '<p class="empty-state">No results yet</p>'
     );
@@ -876,22 +1009,31 @@ async function loadFutsal() {
       'recentResults',
       'quickStandings',
       'topScorers'
-    ].forEach(id => {
-      const el =
-        document.getElementById(id);
+    ].forEach(
+      id => {
+        const el =
+          document.getElementById(
+            id
+          );
 
-      if (el) {
-        el.innerHTML =
-          '<p class="text-red-400 text-sm p-3">' +
-          (err.message || 'Error') +
-          '</p>';
+        if (el) {
+          el.innerHTML =
+            '<p class="text-red-400 text-sm p-3">' +
+            (
+              err.message ||
+              'Error'
+            ) +
+            '</p>';
+        }
       }
-    });
+    );
   }
 }
 
 document
-  .getElementById('refreshBtn')
+  .getElementById(
+    'refreshBtn'
+  )
   ?.addEventListener(
     'click',
     loadFutsal
