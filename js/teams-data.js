@@ -7,7 +7,8 @@
     { name: "Thassa United FC", players: ["Ayushhmaan Thakur", "Ayush Mishra", "Aditya Saini", "Dev Nandan", "Anshuman Singh", "Jatin Narula"] },
     { name: "Beer Pressure FC", players: ["Francis", "Sajora", "Adhitya", "Chirag", "Dhyeya Gohil (faculty)", "Bhaumik", "Ranjit"] },
     { name: "One Last Time", players: ["Shree", "Varun", "Nayan", "Kawar", "Ritesh", "Nikesh", "Rishiraj"] },
-    { name: "Hazel Aid FC", players: ["Aadithyan M", "Siddharth Purohit", "Nakul Dev", "Surya", "Abhijeet", "Akshat Tripathi", "Ujjwal"] }
+    { name: "Hazel Aid FC", players: ["Aadithyan M", "Siddharth Purohit", "Nakul Dev", "Surya", "Abhijeet", "Akshat Tripathi", "Ujjwal"] },
+    { name: "LLB", players: ["Ankur Mishra", "Jayaghosh", "Vikash Kumar", "Saurabh", "Aditya Burvey", "Sagar Mishra", "Braham Pal Singh"] }
   ];
   var futsalWomen = ["Antara Joshi (Sem 1)", "Bhavika Tripathi (Sem 1)", "Avika Litoria (Sem 1)", "Astha (Sem 1)", "Mansi (Sem 3)", "Tuhinanshu (Sem 3)", "Subhashini (Sem 3)"];
 
