@@ -228,29 +228,30 @@ function renderMatchCard(match) {
   );
 }
 
+/*
+ * Team grouping is now driven by the actual group_name
+ * stored on each team.
+ *
+ * Official tournament structure currently uses:
+ * Group A, B, C, D and E.
+ *
+ * No team-name pattern matching is used anymore.
+ */
 function teamGroupLabel(t) {
-  if (
-    t.group_name === 'Group A' ||
-    t.group_name === 'Group B'
-  ) {
-    return t.group_name;
-  }
-
-  const n = (t.name || '').toLowerCase();
+  const group =
+    String(t.group_name || '').trim();
 
   if (
-    /thassa|hazel|predator|one last/.test(n)
+    group === 'Group A' ||
+    group === 'Group B' ||
+    group === 'Group C' ||
+    group === 'Group D' ||
+    group === 'Group E'
   ) {
-    return 'Group A';
+    return group;
   }
 
-  if (
-    /butterfly|og|beer/.test(n)
-  ) {
-    return 'Group B';
-  }
-
-  return t.group_name || 'Other';
+  return group || 'Other';
 }
 
 function computeStandings() {
@@ -412,12 +413,21 @@ function renderStandings(rows) {
     byGroup[g].push(r);
   });
 
-  const order = ['Group A', 'Group B'].concat(
+  const order = [
+    'Group A',
+    'Group B',
+    'Group C',
+    'Group D',
+    'Group E'
+  ].concat(
     Object.keys(byGroup)
       .filter(
         g =>
           g !== 'Group A' &&
-          g !== 'Group B'
+          g !== 'Group B' &&
+          g !== 'Group C' &&
+          g !== 'Group D' &&
+          g !== 'Group E'
       )
       .sort()
   );
@@ -425,6 +435,11 @@ function renderStandings(rows) {
   const sortRows = list => {
     const rows = list.slice();
 
+    /*
+     * Aggregate tiebreaks:
+     * Points → Goal Difference → Goals Scored
+     * → Goals Conceded → Head-to-Head.
+     */
     rows.sort((a, b) => {
       if (b.pts !== a.pts) {
         return b.pts - a.pts;
