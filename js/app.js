@@ -23,7 +23,7 @@
    * Futsal Phase 1 changes.
    */
   s.src =
-    'js/futsal-app.js?v=pens5';
+    'js/futsal-app.js?v=pens6';
 
   s.async = false;
 
