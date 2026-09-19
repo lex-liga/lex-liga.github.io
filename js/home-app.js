@@ -132,6 +132,87 @@ function loadBadmintonRules() {
   });
 }
 
+function getBadmintonWatchItem(m) {
+  const r =
+    getBadmintonRules();
+
+  let scoreKey = '';
+
+  if (r) {
+    const d =
+      r.getDisplay(m);
+
+    if (d.bestOfThree) {
+      scoreKey =
+        String(
+          d.currentScoreP1
+        ) +
+        '-' +
+        String(
+          d.currentScoreP2
+        ) +
+        '|game:' +
+        String(
+          d.currentGame
+        ) +
+        '|games:' +
+        String(
+          d.gamesP1
+        ) +
+        '-' +
+        String(
+          d.gamesP2
+        );
+    } else {
+      scoreKey =
+        String(
+          d.currentScoreP1
+        ) +
+        '-' +
+        String(
+          d.currentScoreP2
+        );
+    }
+  } else {
+    scoreKey =
+      String(
+        Number(
+          m.g1_p1
+        ) || 0
+      ) +
+      '-' +
+      String(
+        Number(
+          m.g1_p2
+        ) || 0
+      );
+  }
+
+  return {
+    id:
+      'badminton-' +
+      m.id,
+
+    label:
+      (m.player1 ||
+        'Player 1') +
+      ' vs ' +
+      (m.player2 ||
+        'Player 2'),
+
+    scoreKey:
+      scoreKey +
+      '|status:' +
+      String(
+        m.status ||
+        ''
+      ),
+
+    isLive:
+      m.status === 'live'
+  };
+}
+
 async function loadHome() {
   const liveEl =
     document.getElementById(
@@ -218,14 +299,6 @@ async function loadHome() {
     const bmAll =
       bmRes.data || [];
 
-    /*
-     * Futsal active states:
-     *
-     * LIVE
-     * HALF-TIME
-     * EXTRA TIME
-     * PENALTIES
-     */
     const futsalLive =
       futsalAll.filter(
         m =>
@@ -302,15 +375,18 @@ async function loadHome() {
     );
 
     /*
-     * Notify about Futsal score/state changes
-     * from the home page as well.
+     * Watch ALL Futsal matches.
+     *
+     * This is important because a finished
+     * match must be passed to lexWatchScores()
+     * so knownLive can be cleared.
      */
     if (
       typeof window.lexWatchScores ===
       'function'
     ) {
       window.lexWatchScores(
-        futsalLive.map(
+        futsalAll.map(
           function (m) {
             const home =
               teamName(
@@ -344,15 +420,6 @@ async function loadHome() {
                 ' vs ' +
                 away,
 
-              /*
-               * Include:
-               * - normal score
-               * - penalty score
-               * - match phase
-               *
-               * so notifications also work for:
-               * Extra Time and penalty changes.
-               */
               scoreKey:
                 String(
                   m.home_score || 0
@@ -366,11 +433,35 @@ async function loadHome() {
                 '-' +
                 pa +
                 '|status:' +
-                m.status,
+                String(
+                  m.status ||
+                  ''
+                ),
 
               isLive:
-                true
+                m.status === 'live' ||
+                m.status === 'half_time' ||
+                m.status === 'extra_time' ||
+                m.status === 'penalties'
             };
+          }
+        )
+      );
+
+      /*
+       * Watch ALL Badminton matches too.
+       *
+       * Previously only live Badminton matches
+       * were passed to the watcher. That meant
+       * knownLive could remain stuck after a
+       * match finished.
+       */
+      window.lexWatchScores(
+        bmAll.map(
+          function (m) {
+            return getBadmintonWatchItem(
+              m
+            );
           }
         )
       );
@@ -604,38 +695,6 @@ function renderBmLive(m) {
   ) {
     notice =
       ' · Golden Point';
-  }
-
-  /*
-   * Keep Badminton notifications working
-   * through the same live watcher.
-   */
-  if (
-    typeof window.lexWatchScores ===
-    'function'
-  ) {
-    window.lexWatchScores([
-      {
-        id:
-          'badminton-' +
-          m.id,
-
-        label:
-          (m.player1 ||
-            'Player 1') +
-          ' vs ' +
-          (m.player2 ||
-            'Player 2'),
-
-        scoreKey:
-          scoreLine +
-          '|status:' +
-          m.status,
-
-        isLive:
-          true
-      }
-    ]);
   }
 
   return `
