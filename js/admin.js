@@ -40,9 +40,8 @@ function isKnockoutMatch(m) {
 
 function scoresAreTied(m) {
   return (
-    Number(m.home_score) || 0
-  ) === (
-    Number(m.away_score) || 0
+    (Number(m.home_score) || 0) ===
+    (Number(m.away_score) || 0)
   );
 }
 
@@ -256,7 +255,9 @@ function renderAdminCard(m) {
   const goalsList =
     matchGoals.length
       ? `<div class="mt-4 space-y-1">
-          <p class="text-[11px] font-bold text-slate-500 uppercase">Goals</p>
+          <p class="text-[11px] font-bold text-slate-500 uppercase">
+            Goals
+          </p>
 
           ${matchGoals
             .map(
@@ -308,7 +309,9 @@ function renderAdminCard(m) {
   const cardsList =
     matchCards.length
       ? `<div class="mt-3 space-y-1">
-          <p class="text-[11px] font-bold text-slate-500 uppercase">Cards</p>
+          <p class="text-[11px] font-bold text-slate-500 uppercase">
+            Cards
+          </p>
 
           ${matchCards
             .map(
@@ -466,10 +469,7 @@ function renderAdminCard(m) {
     knockout &&
     tied &&
     !pensOn &&
-    (
-      m.status === 'live' ||
-      m.status === 'half_time'
-    );
+    m.status === 'live';
 
   const canGoToPens =
     knockout &&
@@ -785,6 +785,39 @@ async function addGoalAndScore(
   playerName,
   minute
 ) {
+  const {
+    data: m,
+    error: matchError
+  } = await sb
+    .from('matches')
+    .select(
+      'status, home_score, away_score, home_team_id, away_team_id'
+    )
+    .eq('id', matchId)
+    .single();
+
+  if (
+    matchError ||
+    !m
+  ) {
+    alert(
+      matchError
+        ? matchError.message
+        : 'Match not found.'
+    );
+    return;
+  }
+
+  if (
+    m.status !== 'live' &&
+    m.status !== 'extra_time'
+  ) {
+    alert(
+      'Goals can only be added to a live or extra-time match.'
+    );
+    return;
+  }
+
   const el =
     document.getElementById(
       `${side}-${matchId}`
@@ -796,7 +829,13 @@ async function addGoalAndScore(
         el &&
         el.textContent,
         10
-      ) || 0
+      ) ||
+      Number(
+        side === 'home'
+          ? m.home_score
+          : m.away_score
+      ) ||
+      0
     ) + 1;
 
   if (el) {
@@ -809,18 +848,28 @@ async function addGoalAndScore(
       ? { home_score: current }
       : { away_score: current };
 
+  /*
+   * IMPORTANT:
+   * Preserve EXTRA TIME status when a goal is
+   * scored during extra time.
+   */
+  scoreUpdate.status =
+    m.status === 'extra_time'
+      ? 'extra_time'
+      : 'live';
+
   scoreUpdate.updated_at =
     new Date().toISOString();
-
-  scoreUpdate.status =
-    'live';
 
   const {
     error: scoreError
   } = await sb
     .from('matches')
     .update(scoreUpdate)
-    .eq('id', matchId);
+    .eq(
+      'id',
+      matchId
+    );
 
   if (scoreError) {
     alert(
@@ -832,34 +881,24 @@ async function addGoalAndScore(
     return;
   }
 
-  const {
-    data: matchData
-  } = await sb
-    .from('matches')
-    .select(
-      'home_team_id, away_team_id'
-    )
-    .eq('id', matchId)
-    .single();
-
-  if (!matchData) {
-    return;
-  }
-
   const teamId =
     side === 'home'
-      ? matchData.home_team_id
-      : matchData.away_team_id;
+      ? m.home_team_id
+      : m.away_team_id;
 
   const {
     error: goalError
   } = await sb
     .from('goals')
     .insert({
-      match_id: matchId,
-      team_id: teamId,
-      player_name: playerName,
-      minute: minute
+      match_id:
+        matchId,
+      team_id:
+        teamId,
+      player_name:
+        playerName,
+      minute:
+        minute
     });
 
   if (goalError) {
@@ -891,7 +930,10 @@ window.deleteGoal =
     } = await sb
       .from('goals')
       .delete()
-      .eq('id', goalId);
+      .eq(
+        'id',
+        goalId
+      );
 
     if (delError) {
       alert(delError.message);
@@ -925,7 +967,10 @@ window.deleteGoal =
     await sb
       .from('matches')
       .update(scoreUpdate)
-      .eq('id', matchId);
+      .eq(
+        'id',
+        matchId
+      );
 
     loadAdminData();
   };
@@ -958,12 +1003,18 @@ window.changeScoreOnly =
     } = await sb
       .from('matches')
       .select(
-        'status, group_name, pens_on'
+        'status, group_name, pens_on, home_score, away_score'
       )
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
-    if (matchError || !m) {
+    if (
+      matchError ||
+      !m
+    ) {
       alert(
         matchError
           ? matchError.message
@@ -975,6 +1026,16 @@ window.changeScoreOnly =
     if (hasPenaltyData(m)) {
       alert(
         'Match is in the penalty phase. Change penalty scores there.'
+      );
+      return;
+    }
+
+    if (
+      m.status !== 'live' &&
+      m.status !== 'extra_time'
+    ) {
+      alert(
+        'Score can only be changed while the match is live or in extra time.'
       );
       return;
     }
@@ -992,7 +1053,13 @@ window.changeScoreOnly =
             el &&
             el.textContent,
             10
-          ) || 0
+          ) ||
+          Number(
+            side === 'home'
+              ? m.home_score
+              : m.away_score
+          ) ||
+          0
         ) + delta
       );
 
@@ -1006,32 +1073,30 @@ window.changeScoreOnly =
         ? { home_score: current }
         : { away_score: current };
 
+    /*
+     * Preserve the current match phase.
+     */
+    update.status =
+      m.status;
+
     update.updated_at =
       new Date().toISOString();
-
-    try {
-      if (
-        m.status === 'not_started' &&
-        delta > 0
-      ) {
-        update.status =
-          'live';
-      }
-    } catch (e) {}
 
     const {
       error
     } = await sb
       .from('matches')
       .update(update)
-      .eq('id', matchId);
+      .eq(
+        'id',
+        matchId
+      );
 
     if (error) {
       alert(error.message);
-      loadAdminData();
-    } else {
-      loadAdminData();
     }
+
+    loadAdminData();
   };
 
 window.openCardDialog =
@@ -1071,7 +1136,8 @@ window.openCardDialog =
     } = await sb
       .from('cards')
       .insert({
-        match_id: matchId,
+        match_id:
+          matchId,
         player_name:
           player.trim(),
         card_type:
@@ -1102,7 +1168,10 @@ window.deleteCard =
     } = await sb
       .from('cards')
       .delete()
-      .eq('id', cardId);
+      .eq(
+        'id',
+        cardId
+      );
 
     if (error) {
       alert(error.message);
@@ -1119,10 +1188,16 @@ window.startExtraTime =
     } = await sb
       .from('matches')
       .select('*')
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
-    if (loadError || !m) {
+    if (
+      loadError ||
+      !m
+    ) {
       alert(
         loadError
           ? loadError.message
@@ -1144,21 +1219,16 @@ window.startExtraTime =
       return;
     }
 
-    if (
-      hs !== as
-    ) {
+    if (hs !== as) {
       alert(
         'Extra time can only start when the match is level after normal time.'
       );
       return;
     }
 
-    if (
-      m.status !== 'live' &&
-      m.status !== 'half_time'
-    ) {
+    if (m.status !== 'live') {
       alert(
-        'Extra time can only be started from a live match.'
+        'Extra time can only be started from a live match after normal time.'
       );
       return;
     }
@@ -1204,10 +1274,16 @@ window.startPens =
     } = await sb
       .from('matches')
       .select('*')
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
-    if (loadError || !m) {
+    if (
+      loadError ||
+      !m
+    ) {
       alert(
         loadError
           ? loadError.message
@@ -1229,18 +1305,14 @@ window.startPens =
       return;
     }
 
-    if (
-      hs !== as
-    ) {
+    if (hs !== as) {
       alert(
         'Penalties can only start when the match is level.'
       );
       return;
     }
 
-    if (
-      m.status !== 'extra_time'
-    ) {
+    if (m.status !== 'extra_time') {
       alert(
         'Complete extra time before starting penalties.'
       );
@@ -1252,11 +1324,16 @@ window.startPens =
     } = await sb
       .from('matches')
       .update({
-        pens_on: true,
-        pen_home: 0,
-        pen_away: 0,
-        pens_sudden: false,
-        status: 'penalties',
+        pens_on:
+          true,
+        pen_home:
+          0,
+        pen_away:
+          0,
+        pens_sudden:
+          false,
+        status:
+          'penalties',
         updated_at:
           new Date().toISOString()
       })
@@ -1282,7 +1359,10 @@ window.enterSuddenDeath =
       .select(
         'status, pen_home, pen_away, pens_sudden, pens_on'
       )
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
     if (
@@ -1321,7 +1401,8 @@ window.enterSuddenDeath =
     } = await sb
       .from('matches')
       .update({
-        pens_on: true,
+        pens_on:
+          true,
         pens_sudden:
           true,
         status:
@@ -1377,7 +1458,10 @@ window.changePen =
     } = await sb
       .from('matches')
       .select('*')
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
     if (
@@ -1413,12 +1497,6 @@ window.changePen =
         ? ph
         : pa;
 
-    /*
-     * NORMAL PENALTY PHASE
-     * --------------------
-     * Five scored penalties is the hard cap
-     * before sudden death is explicitly entered.
-     */
     if (
       delta > 0 &&
       !m.pens_sudden &&
@@ -1431,11 +1509,6 @@ window.changePen =
       return;
     }
 
-    /*
-     * Do not allow an unnecessary penalty
-     * after the match has already been won
-     * in sudden death.
-     */
     if (
       m.pens_sudden &&
       delta > 0 &&
@@ -1478,9 +1551,12 @@ window.changePen =
       await sb
         .from('matches')
         .update({
-          pens_on: true,
-          pen_home: ph,
-          pen_away: pa,
+          pens_on:
+            true,
+          pen_home:
+            ph,
+          pen_away:
+            pa,
           pens_sudden:
             !!m.pens_sudden,
           status:
@@ -1521,7 +1597,10 @@ window.clearPens =
       .select(
         'status, group_name, home_score, away_score, pens_on'
       )
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
     if (
@@ -1551,22 +1630,18 @@ window.clearPens =
     } = await sb
       .from('matches')
       .update({
-        pens_on: false,
-        pen_home: 0,
-        pen_away: 0,
-        pens_sudden: false,
-
-        /*
-         * Penalties are reached only after a tied
-         * knockout match completes extra time.
-         * Returning to extra_time prevents a
-         * finished 2-2 from becoming a false draw.
-         */
+        pens_on:
+          false,
+        pen_home:
+          0,
+        pen_away:
+          0,
+        pens_sudden:
+          false,
         status:
           isKnockoutMatch(m)
             ? 'extra_time'
             : 'finished',
-
         updated_at:
           new Date().toISOString()
       })
@@ -1593,7 +1668,10 @@ window.updateStatus =
     } = await sb
       .from('matches')
       .select('*')
-      .eq('id', matchId)
+      .eq(
+        'id',
+        matchId
+      )
       .single();
 
     if (
@@ -1620,10 +1698,6 @@ window.updateStatus =
     const knockout =
       isKnockoutMatch(m);
 
-    /*
-     * Normal-time knockout draw:
-     * do not allow direct Finish.
-     */
     if (
       status === 'finished' &&
       knockout &&
@@ -1637,10 +1711,6 @@ window.updateStatus =
       return;
     }
 
-    /*
-     * Extra-time knockout draw:
-     * do not allow direct Finish.
-     */
     if (
       status === 'finished' &&
       knockout &&
@@ -1653,16 +1723,26 @@ window.updateStatus =
       return;
     }
 
-    /*
-     * Do not manually turn an active penalty phase
-     * into a normal finished state.
-     */
     if (
       status === 'finished' &&
       m.status === 'penalties'
     ) {
       alert(
         'Complete the penalty shootout or correct it using Clear pens.'
+      );
+      return;
+    }
+
+    if (
+      status === 'half_time' &&
+      (
+        m.status === 'finished' ||
+        m.status === 'walkover' ||
+        m.status === 'penalties'
+      )
+    ) {
+      alert(
+        'This match cannot return to half-time from its current state.'
       );
       return;
     }
@@ -1704,15 +1784,22 @@ window.resetScore =
     await sb
       .from('matches')
       .update({
-        home_score: 0,
-        away_score: 0,
+        home_score:
+          0,
+        away_score:
+          0,
 
-        pens_on: false,
-        pen_home: 0,
-        pen_away: 0,
-        pens_sudden: false,
+        pens_on:
+          false,
+        pen_home:
+          0,
+        pen_away:
+          0,
+        pens_sudden:
+          false,
 
-        status: 'not_started',
+        status:
+          'not_started',
 
         updated_at:
           new Date().toISOString()
@@ -1822,16 +1909,23 @@ document
       } = await sb
         .from('matches')
         .insert({
-          home_team_id: home,
-          away_team_id: away,
+          home_team_id:
+            home,
+
+          away_team_id:
+            away,
+
           group_name:
             group || null,
 
           status:
             'not_started',
 
-          home_score: 0,
-          away_score: 0,
+          home_score:
+            0,
+
+          away_score:
+            0,
 
           kickoff_time:
             new Date().toISOString()
