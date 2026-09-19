@@ -1,6 +1,6 @@
 /* Lex Liga service worker – app shell + notifications */
 
-var CACHE = 'lex-liga-v6';
+var CACHE = 'lex-liga-v7';
 
 var ASSETS = [
   './',
