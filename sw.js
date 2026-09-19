@@ -1,5 +1,5 @@
 /* Lex Liga service worker – cache + notifications */
-var CACHE = 'lex-liga-v2';
+var CACHE = 'lex-liga-v3';
 var ASSETS = [
   './',
   './index.html',
