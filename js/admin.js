@@ -198,7 +198,7 @@ function renderAdminCard(m) {
       ${cardsList}
 
       <div class="flex justify-between text-xs pt-1 border-t border-slate-700">
-        <button type="button" onclick="resetScore('${m.id}')" class="text-slate-500 py-2">Reset</button>
+        <button type="button" onclick="resetScore('${m.id}')" class="text-slate-400 py-2 font-semibold">Reset → Upcoming</button>
         <button type="button" onclick="deleteMatch('${m.id}')" class="text-red-400/80 py-2">Delete match</button>
       </div>
     </div>`;
@@ -277,9 +277,11 @@ window.updateStatus = async function(matchId, status) {
 };
 
 window.resetScore = async function(matchId) {
-  if (!confirm('Reset score to 0-0 and clear all goals of this match?')) return;
+  if (!confirm('Reset this match?\n\n• Score → 0-0\n• Clear goals, cards & pens\n• Status → Upcoming')) return;
   await sb.from('matches').update({
-    home_score: 0, away_score: 0, pens_on: false, pen_home: 0, pen_away: 0, pens_sudden: false,
+    home_score: 0, away_score: 0,
+    pens_on: false, pen_home: 0, pen_away: 0, pens_sudden: false,
+    status: 'not_started',
     updated_at: new Date().toISOString()
   }).eq('id', matchId);
   await sb.from('goals').delete().eq('match_id', matchId);
