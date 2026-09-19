@@ -120,14 +120,24 @@
       var match = await fetchMatch(id);
 
       if (match.status === 'walkover') {
-        alert('This match is recorded as a walkover. Reset the match before entering scores.');
+        alert(
+          'This match is recorded as a walkover. ' +
+          'Reset the match before entering scores.'
+        );
         return;
       }
 
-      var result = r.applyDelta(match, side, amount);
+      var result = r.applyDelta(
+        match,
+        side,
+        amount
+      );
 
       if (!result.changed) {
-        alert(result.reason || 'Score could not be changed.');
+        alert(
+          result.reason ||
+          'Score could not be changed.'
+        );
         return;
       }
 
@@ -181,7 +191,8 @@
       reset.g3_p1 = 0;
       reset.g3_p2 = 0;
 
-      reset.stage = r.normalizeStage(match.stage);
+      reset.stage =
+        r.normalizeStage(match.stage);
 
       var update = {
         stage: reset.stage,
@@ -200,7 +211,8 @@
         g3_p1: 0,
         g3_p2: 0,
 
-        updated_at: new Date().toISOString()
+        updated_at:
+          new Date().toISOString()
       };
 
       var up = await sb
@@ -222,13 +234,11 @@
   /*
    * Manual status control.
    *
-   * For a normal match:
-   *   Upcoming -> not_started
-   *   LIVE     -> live
+   * Upcoming -> not_started
+   * LIVE     -> live
    *
-   * "Finished" is intentionally rule-aware:
-   * the engine must have a valid winner. This prevents an
-   * unfinished match from being marked FT without a winner.
+   * Finished is rule-aware:
+   * the engine must have a valid winner.
    */
   window.bmStatus = async function (id, status) {
     var r = requireRules();
@@ -246,8 +256,11 @@
       var match = await fetchMatch(id);
 
       if (status === 'finished') {
-        var evaluated = r.evaluate(match);
-        var winner = r.getMatchWinner(evaluated);
+        var evaluated =
+          r.evaluate(match);
+
+        var winner =
+          r.getMatchWinner(evaluated);
 
         if (!winner) {
           alert(
@@ -257,12 +270,14 @@
           return;
         }
 
-        var finishedUpdate = r.toUpdate(evaluated);
+        var finishedUpdate =
+          r.toUpdate(evaluated);
 
-        var finishedRes = await sb
-          .from('badminton_matches')
-          .update(finishedUpdate)
-          .eq('id', id);
+        var finishedRes =
+          await sb
+            .from('badminton_matches')
+            .update(finishedUpdate)
+            .eq('id', id);
 
         if (finishedRes.error) {
           alert(finishedRes.error.message);
@@ -273,24 +288,28 @@
         return;
       }
 
-      if (status !== 'not_started' && status !== 'live') {
+      if (
+        status !== 'not_started' &&
+        status !== 'live'
+      ) {
         alert('Invalid badminton status.');
         return;
       }
 
       /*
        * Re-evaluate existing scores first.
-       * This prevents a manually selected status from wiping
-       * winner_side or game totals.
+       * This prevents a manually selected status
+       * from wiping winner_side or game totals.
        */
       var next = r.evaluate(match);
 
       /*
-       * If the score already produces a finished match,
-       * don't allow it to be changed to LIVE/Upcoming
-       * accidentally.
+       * If the score already produces a finished
+       * match, do not allow it to be changed to
+       * LIVE/Upcoming accidentally.
        */
-      var existingWinner = r.getMatchWinner(next);
+      var existingWinner =
+        r.getMatchWinner(next);
 
       if (existingWinner) {
         alert(
@@ -324,12 +343,19 @@
   /*
    * Record a walkover.
    *
+   * IMPORTANT:
+   * A match that has already finished with a
+   * valid score cannot be changed into a walkover.
+   *
    * side:
    *   p1 -> Player/Pair 1 receives the walkover
    *   p2 -> Player/Pair 2 receives the walkover
    */
   window.bmWalkover = async function (id, side) {
-    if (side !== 'p1' && side !== 'p2') {
+    if (
+      side !== 'p1' &&
+      side !== 'p2'
+    ) {
       alert('Invalid walkover winner.');
       return;
     }
@@ -341,13 +367,53 @@
       return;
     }
 
+    var r = requireRules();
+
+    if (!r) return;
+
     try {
       var match = await fetchMatch(id);
 
+      /*
+       * Hard block for an existing walkover.
+       */
+      if (match.status === 'walkover') {
+        alert(
+          'This match is already recorded as a walkover.'
+        );
+        return;
+      }
+
+      /*
+       * Hard block for a score-completed match.
+       *
+       * We evaluate the score itself instead of relying
+       * only on status, because winner_side/status could
+       * have been manually changed earlier.
+       */
+      var evaluated =
+        r.evaluate(match);
+
+      var existingWinner =
+        r.getMatchWinner(evaluated);
+
+      if (
+        match.status === 'finished' ||
+        existingWinner
+      ) {
+        alert(
+          'This match already has a valid completed result.\n\n' +
+          'Reset the match before recording a walkover.'
+        );
+        return;
+      }
+
       var winnerName =
         side === 'p1'
-          ? (match.player1 || 'Player / Pair 1')
-          : (match.player2 || 'Player / Pair 2');
+          ? (match.player1 ||
+             'Player / Pair 1')
+          : (match.player2 ||
+             'Player / Pair 2');
 
       if (!confirm(
         'Record a walkover for:\n\n' +
@@ -361,7 +427,8 @@
       var update = {
         status: 'walkover',
         winner_side: side,
-        updated_at: new Date().toISOString()
+        updated_at:
+          new Date().toISOString()
       };
 
       var res = await sb
@@ -381,8 +448,12 @@
   };
 
   /*
-   * Clear a walkover and return the match to Upcoming.
-   * The score is preserved; use Reset if a full score reset is wanted.
+   * Clear a walkover.
+   *
+   * The stored score is preserved only when it does not
+   * already represent a completed match. Otherwise the
+   * admin is instructed to reset the match, avoiding an
+   * inconsistent "Upcoming" record with a winning score.
    */
   window.bmClearWalkover = async function (id) {
     var sb = sbClient();
@@ -396,12 +467,15 @@
       var match = await fetchMatch(id);
 
       if (match.status !== 'walkover') {
-        alert('This match is not currently a walkover.');
+        alert(
+          'This match is not currently a walkover.'
+        );
         return;
       }
 
       if (!confirm(
-        'Clear the walkover result and return this match to Upcoming?'
+        'Clear the walkover result and return this match to Upcoming?\n\n' +
+        'The existing score will be preserved.'
       )) {
         return;
       }
@@ -410,15 +484,67 @@
 
       if (!r) return;
 
-      var next = r.cloneMatch(match);
+      var next =
+        r.cloneMatch(match);
 
-      next.status = 'not_started';
       next.winner_side = null;
 
-      var update = r.toUpdate(next);
+      var evaluated =
+        r.evaluate(next);
 
-      update.status = 'not_started';
-      update.winner_side = null;
+      var scoreWinner =
+        r.getMatchWinner(evaluated);
+
+      /*
+       * If the stored score itself is a winning result,
+       * the admin should reset rather than create an
+       * invalid upcoming match.
+       */
+      if (scoreWinner) {
+        alert(
+          'This match contains a completed winning score.\n\n' +
+          'Use Reset match if you want to start it again.'
+        );
+        return;
+      }
+
+      var update = {
+        stage:
+          r.normalizeStage(match.stage),
+
+        status: 'not_started',
+        winner_side: null,
+
+        current_game:
+          r.getCurrentGame(evaluated),
+
+        games_p1:
+          evaluated.games_p1,
+
+        games_p2:
+          evaluated.games_p2,
+
+        g1_p1:
+          evaluated.g1_p1,
+
+        g1_p2:
+          evaluated.g1_p2,
+
+        g2_p1:
+          evaluated.g2_p1,
+
+        g2_p2:
+          evaluated.g2_p2,
+
+        g3_p1:
+          evaluated.g3_p1,
+
+        g3_p2:
+          evaluated.g3_p2,
+
+        updated_at:
+          new Date().toISOString()
+      };
 
       var res = await sb
         .from('badminton_matches')
@@ -479,31 +605,49 @@
 
   /*
    * Add a new badminton match.
-   *
-   * bmStage will be added to admin.html in a later step.
-   * Until then the database default remains round1.
    */
   window.addBadmintonMatch = async function () {
-    var p1El = document.getElementById('bmP1');
-    var p2El = document.getElementById('bmP2');
-    var catEl = document.getElementById('bmCategory');
-    var stageEl = document.getElementById('bmStage');
+    var p1El =
+      document.getElementById('bmP1');
 
-    var p1 = ((p1El && p1El.value) || '').trim();
-    var p2 = ((p2El && p2El.value) || '').trim();
-    var cat = ((catEl && catEl.value) || '').trim();
+    var p2El =
+      document.getElementById('bmP2');
+
+    var catEl =
+      document.getElementById('bmCategory');
+
+    var stageEl =
+      document.getElementById('bmStage');
+
+    var p1 =
+      ((p1El && p1El.value) || '')
+        .trim();
+
+    var p2 =
+      ((p2El && p2El.value) || '')
+        .trim();
+
+    var cat =
+      ((catEl && catEl.value) || '')
+        .trim();
 
     var stage =
-      ((stageEl && stageEl.value) || 'round1').trim().toLowerCase();
+      ((stageEl && stageEl.value) ||
+       'round1')
+        .trim()
+        .toLowerCase();
 
     var r = requireRules();
 
     if (!r) return;
 
-    stage = r.normalizeStage(stage);
+    stage =
+      r.normalizeStage(stage);
 
     if (!p1 || !p2) {
-      alert('Enter both players / pairs.');
+      alert(
+        'Enter both players / pairs.'
+      );
       return;
     }
 
@@ -519,7 +663,8 @@
         player1: p1,
         player2: p2,
 
-        category: cat || 'MS · R1',
+        category:
+          cat || 'MS · R1',
 
         stage: stage,
 
@@ -533,8 +678,10 @@
 
         g1_p1: 0,
         g1_p2: 0,
+
         g2_p1: 0,
         g2_p2: 0,
+
         g3_p1: 0,
         g3_p2: 0
       };
@@ -544,12 +691,20 @@
         .insert(insertPayload);
 
       if (ins.error) {
-        alert('Could not add match:\n' + ins.error.message);
+        alert(
+          'Could not add match:\n' +
+          ins.error.message
+        );
         return;
       }
 
-      if (p1El) p1El.value = '';
-      if (p2El) p2El.value = '';
+      if (p1El) {
+        p1El.value = '';
+      }
+
+      if (p2El) {
+        p2El.value = '';
+      }
 
       if (catEl) {
         catEl.selectedIndex = 0;
