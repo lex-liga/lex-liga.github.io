@@ -5,7 +5,7 @@
     { name: "OG's", players: ["Abhay", "Vikas", "Sourav", "Ajinkey", "Divyansh", "Bala", "Dr. Alaukik Srivastav (faculty)"] },
     { name: "Mr.Butterfly FC", players: ["Rudra Tak", "Yuvraj Sonker", "Kunnal Kumar", "Alok Kumar", "Om Mishra", "Saptak Das"] },
     { name: "Thassa United FC", players: ["Ayushhmaan Thakur", "Ayush Mishra", "Aditya Saini", "Dev Nandan", "Anshuman Singh", "Jatin Narula"] },
-    { name: "Beer Pressure FC", players: ["Francis", "Sajora", "Adhitya", "Chirag", "Dhyeya Gohil", "Bhaumik", "Ranjit"] },
+    { name: "Beer Pressure FC", players: ["Francis", "Sajora", "Adhitya", "Chirag", "Dhyeya Gohil (faculty)", "Bhaumik", "Ranjit"] },
     { name: "One Last Time", players: ["Shree", "Varun", "Nayan", "Kawar", "Ritesh", "Nikesh", "Rishiraj"] },
     { name: "Hazel Aid FC", players: ["Aadithyan M", "Siddharth Purohit", "Nakul Dev", "Surya", "Abhijeet", "Akshat Tripathi", "Ujjwal"] }
   ];
