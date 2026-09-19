@@ -4,7 +4,7 @@
   if (document.body) document.body.classList.remove('light');
   try { localStorage.setItem('theme', 'dark'); } catch (e) {}
   var s = document.createElement('script');
-  s.src = 'js/futsal-app.js?v=pens3';
+  s.src = 'js/futsal-app.js?v=pens4';
   s.async = false;
   s.onload = function () {
     document.documentElement.classList.add('dark');
