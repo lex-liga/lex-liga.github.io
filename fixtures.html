@@ -2,29 +2,63 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fixtures — Lex Liga</title>
-  <meta name="description" content="Fixtures, standings and official rulebooks for Lex Liga." />
-  <meta name="theme-color" content="#0b1120" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Fixtures — Lex Liga</title>
+
+  <meta
+    name="description"
+    content="Fixtures, standings and official rulebooks for Lex Liga."
+  />
+
+  <meta
+    name="theme-color"
+    content="#0b1120"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/extras.css" />
-  <link rel="manifest" href="manifest.json" />
+  <link
+    rel="stylesheet"
+    href="css/styles.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/extras.css"
+  />
+
+  <link
+    rel="manifest"
+    href="manifest.json"
+  />
 </head>
 
 <body class="min-h-screen">
 
   <header class="site-header sticky top-0 z-50"></header>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10 pb-24">
+  <main
+    class="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10 pb-24"
+  >
 
     <div>
-      <p class="section-eyebrow">SCHEDULE</p>
+      <p class="section-eyebrow">
+        SCHEDULE
+      </p>
 
       <h1 class="text-2xl font-extrabold">
         Fixtures &amp; Rules
@@ -35,20 +69,28 @@
       </p>
     </div>
 
+    <!-- ALL MATCHES -->
+
     <section>
 
       <div class="section-heading-row">
 
         <div>
-          <p class="section-eyebrow">SCHEDULE</p>
-          <h2>All Matches</h2>
+          <p class="section-eyebrow">
+            SCHEDULE
+          </p>
+
+          <h2>
+            All Matches
+          </h2>
         </div>
 
       </div>
 
       <div
         id="allFixtures"
-        class="space-y-4">
+        class="space-y-4"
+      >
 
         <p class="empty-state">
           Loading fixtures...
@@ -58,13 +100,57 @@
 
     </section>
 
-    <section class="info-section rounded-2xl p-5 sm:p-6">
+    <!-- FULL STANDINGS -->
+
+    <section>
+
+      <div class="section-heading-row">
+
+        <div>
+          <p class="section-eyebrow">
+            TABLES
+          </p>
+
+          <h2>
+            Futsal Standings
+          </h2>
+        </div>
+
+        <span class="section-chip">
+          5 GROUPS
+        </span>
+
+      </div>
+
+      <div
+        id="fullStandings"
+        class="space-y-4"
+      >
+
+        <p class="empty-state">
+          Loading standings...
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- RULEBOOKS -->
+
+    <section
+      class="info-section rounded-2xl p-5 sm:p-6"
+    >
 
       <div class="section-heading-row mb-4">
 
         <div>
-          <p class="section-eyebrow">OFFICIAL</p>
-          <h2>Rulebooks</h2>
+          <p class="section-eyebrow">
+            OFFICIAL
+          </p>
+
+          <h2>
+            Rulebooks
+          </h2>
         </div>
 
       </div>
@@ -75,7 +161,8 @@
           href="assets/rules/futsal-rulebook.pdf"
           target="_blank"
           rel="noopener"
-          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition">
+          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition"
+        >
 
           <div class="text-2xl mb-1">
             ⚽
@@ -95,7 +182,8 @@
           href="assets/rules/badminton-rulebook.pdf"
           target="_blank"
           rel="noopener"
-          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition">
+          class="block rounded-xl border border-slate-600 bg-slate-800/80 px-4 py-4 hover:border-green-500/50 transition"
+        >
 
           <div class="text-2xl mb-1">
             🏸
@@ -115,13 +203,22 @@
 
     </section>
 
-    <section class="info-section rounded-2xl p-5 sm:p-6">
+    <!-- FUTSAL RULES -->
+
+    <section
+      class="info-section rounded-2xl p-5 sm:p-6"
+    >
 
       <div class="section-heading-row mb-4">
 
         <div>
-          <p class="section-eyebrow">⚽ FUTSAL</p>
-          <h2>Rules &amp; Format</h2>
+          <p class="section-eyebrow">
+            ⚽ FUTSAL
+          </p>
+
+          <h2>
+            Rules &amp; Format
+          </h2>
         </div>
 
       </div>
@@ -130,50 +227,66 @@
 
         <li>
           <span>01</span>
+
           <p>
-            5v5 + 2 rolling substitutes (max 7 roster). At least 4 players to start.
+            5v5 + 2 rolling substitutes (max 7 roster).
+            At least 4 players to start.
           </p>
         </li>
 
         <li>
           <span>02</span>
+
           <p>
-            Match: 2 × 8 minutes, 3 min half-time. Continuous clock (ref may stop for injury).
+            Match: 2 × 8 minutes, 3 min half-time.
+            Continuous clock (ref may stop for injury).
           </p>
         </li>
 
         <li>
           <span>03</span>
+
           <p>
-            Group stage → 8-team knockout. Points: Win 3, Draw 1, Loss 0.
+            5 groups → 8-team knockout.
+            Points: Win 3, Draw 1, Loss 0.
           </p>
         </li>
 
         <li>
           <span>04</span>
+
           <p>
-            5 group winners + 3 best runners-up qualify. Tie-break: GD, GF, GA, H2H.
+            5 group winners + 3 best runners-up qualify.
+            Tie-break: GD, GF, GA, H2H.
+            If still unresolved, the organising committee
+            applies a fair additional tiebreak.
           </p>
         </li>
 
         <li>
           <span>05</span>
+
           <p>
-            Knockout draw → extra time → 5 penalties → sudden death.
+            Knockout draw → extra time → 5 penalties →
+            sudden death.
           </p>
         </li>
 
         <li>
           <span>06</span>
+
           <p>
-            Yellow = 1-minute suspension (team plays short). Red = sent off.
+            Yellow = 1-minute suspension (team plays short).
+            Red = sent off.
           </p>
         </li>
 
         <li>
           <span>07</span>
+
           <p>
-            No offside. Fair play required. Referee decisions are final.
+            No offside. Fair play required.
+            Referee decisions are final.
           </p>
         </li>
 
@@ -181,13 +294,22 @@
 
     </section>
 
-    <section class="info-section rounded-2xl p-5 sm:p-6">
+    <!-- BADMINTON RULES -->
+
+    <section
+      class="info-section rounded-2xl p-5 sm:p-6"
+    >
 
       <div class="section-heading-row mb-4">
 
         <div>
-          <p class="section-eyebrow">🏸 BADMINTON</p>
-          <h2>Rules &amp; Format</h2>
+          <p class="section-eyebrow">
+            🏸 BADMINTON
+          </p>
+
+          <h2>
+            Rules &amp; Format
+          </h2>
         </div>
 
       </div>
@@ -196,36 +318,47 @@
 
         <li>
           <span>01</span>
+
           <p>
-            Knock-out from the first round (no league). Only registered players.
+            Knock-out from the first round (no league).
+            Only registered players.
           </p>
         </li>
 
         <li>
           <span>02</span>
+
           <p>
-            Till Quarter-Finals: single set to 15. Golden point at 14–14 (next rally wins).
+            Till Quarter-Finals: single set to 15.
+            Golden point at 14–14 (next rally wins).
           </p>
         </li>
 
         <li>
           <span>03</span>
+
           <p>
-            Semi-Finals &amp; Final: best of 3 to 21, win by 2, cap 30 (at 29–29 next point wins).
+            Semi-Finals &amp; Final: best of 3 to 21,
+            win by 2, cap 30
+            (at 29–29 next point wins).
           </p>
         </li>
 
         <li>
           <span>04</span>
+
           <p>
-            Non-marking shoes compulsory. Report 15 minutes before match.
+            Non-marking shoes compulsory.
+            Report 15 minutes before match.
           </p>
         </li>
 
         <li>
           <span>05</span>
+
           <p>
-            Walkover after 10 minutes no-show. Umpire's decision is final.
+            Walkover after 10 minutes no-show.
+            Umpire's decision is final.
           </p>
         </li>
 
@@ -237,7 +370,9 @@
 
   <footer class="site-footer">
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div
+      class="max-w-6xl mx-auto px-4 sm:px-6 py-8"
+    >
 
       <div class="footer-content">
 
@@ -286,7 +421,7 @@
   <script src="js/badminton-rules.js?v=20260919-1"></script>
 
   <!-- Stage-aware Fixtures rendering -->
-  <script src="js/fixtures-app.js?v=20260919-2"></script>
+  <script src="js/fixtures-app.js?v=20260919-3"></script>
 
   <script src="js/announce.js"></script>
 

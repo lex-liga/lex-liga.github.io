@@ -1,31 +1,129 @@
-/* Lex Liga Futsal – loads local futsal-app with pens support */
+/* Lex Liga Futsal – loads local futsal-app */
 (function () {
   document.documentElement.classList.add('dark');
-  if (document.body) document.body.classList.remove('light');
-  try { localStorage.setItem('theme', 'dark'); } catch (e) {}
-  var s = document.createElement('script');
-  s.src = 'js/futsal-app.js?v=pens3';
+
+  if (document.body) {
+    document.body.classList.remove('light');
+  }
+
+  try {
+    localStorage.setItem(
+      'theme',
+      'dark'
+    );
+  } catch (e) {}
+
+  var s =
+    document.createElement(
+      'script'
+    );
+
+  /*
+   * New cache key for the latest
+   * Futsal Phase 1 changes.
+   */
+  s.src =
+    'js/futsal-app.js?v=pens6';
+
   s.async = false;
-  s.onload = function () {
-    document.documentElement.classList.add('dark');
-    if (document.body) document.body.classList.remove('light');
-    var btn = document.getElementById('themeToggle');
-    if (btn) btn.style.display = 'none';
-    function kick() {
-      try {
-        if (typeof initTheme === 'function') initTheme();
-        if (typeof loadData === 'function') loadData();
-        if (typeof startAutoRefresh === 'function') startAutoRefresh();
-        var rb = document.getElementById('refreshBtn');
-        if (rb && typeof loadData === 'function') rb.onclick = function () { loadData(); };
-      } catch (err) { console.error(err); }
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick);
-    else setTimeout(kick, 50);
-  };
-  s.onerror = function () {
-    var el = document.getElementById('liveMatches');
-    if (el) el.innerHTML = '<p class="empty-state" style="color:#f87171">Could not load scoring script.</p>';
-  };
-  document.head.appendChild(s);
+
+  s.onload =
+    function () {
+      document.documentElement.classList.add(
+        'dark'
+      );
+
+      if (document.body) {
+        document.body.classList.remove(
+          'light'
+        );
+      }
+
+      var btn =
+        document.getElementById(
+          'themeToggle'
+        );
+
+      if (btn) {
+        btn.style.display = 'none';
+      }
+
+      function kick() {
+        try {
+          if (
+            typeof initTheme ===
+            'function'
+          ) {
+            initTheme();
+          }
+
+          if (
+            typeof loadData ===
+            'function'
+          ) {
+            loadData();
+          }
+
+          if (
+            typeof startAutoRefresh ===
+            'function'
+          ) {
+            startAutoRefresh();
+          }
+
+          var rb =
+            document.getElementById(
+              'refreshBtn'
+            );
+
+          if (
+            rb &&
+            typeof loadData ===
+            'function'
+          ) {
+            rb.onclick =
+              function () {
+                loadData();
+              };
+          }
+
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      if (
+        document.readyState ===
+        'loading'
+      ) {
+        document.addEventListener(
+          'DOMContentLoaded',
+          kick
+        );
+      } else {
+        setTimeout(
+          kick,
+          50
+        );
+      }
+    };
+
+  s.onerror =
+    function () {
+      var el =
+        document.getElementById(
+          'liveMatches'
+        );
+
+      if (el) {
+        el.innerHTML =
+          '<p class="empty-state" style="color:#f87171">' +
+          'Could not load scoring script.' +
+          '</p>';
+      }
+    };
+
+  document.head.appendChild(
+    s
+  );
 })();
