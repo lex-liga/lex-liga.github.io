@@ -109,7 +109,7 @@
         var u = await sb.from('announcements').upsert({ id: 1, message: msg, active: active, updated_at: new Date().toISOString() });
         if (u.error) { st.textContent = 'Error: ' + (res.error.message || u.error.message); st.className = 'text-sm text-center text-red-400'; return; }
       }
-      st.textContent = 'Published. Live site updates within ~20s.'; st.className = 'text-sm text-center text-green-400';
+      st.textContent = 'Published.'; st.className = 'text-sm text-center text-green-400';
       document.getElementById('annMsg').value = ''; loadAnnounceAdmin();
     }
     async function deleteAnnounce(id) {
@@ -134,12 +134,9 @@
       if (!sb || !sb.storage) { list.innerHTML = '<p class="text-red-400 text-sm">Supabase not ready</p>'; return; }
       list.innerHTML = '<p class="text-slate-400 text-sm">Loading…</p>';
       var res = await sb.storage.from(GALLERY_BUCKET).list('', { limit: 200, sortBy: { column: 'created_at', order: 'desc' } });
-      if (res.error) {
-        list.innerHTML = '<p class="text-red-400 text-sm">' + escapeHtml(res.error.message) + '</p>';
-        return;
-      }
+      if (res.error) { list.innerHTML = '<p class="text-red-400 text-sm">' + escapeHtml(res.error.message) + '</p>'; return; }
       var files = (res.data || []).filter(function(f) { return f.name && /\.(jpe?g|png|gif|webp)$/i.test(f.name); });
-      if (!files.length) { list.innerHTML = '<p class="text-slate-400 text-sm">No photos yet. Upload below.</p>'; return; }
+      if (!files.length) { list.innerHTML = '<p class="text-slate-400 text-sm">No photos yet.</p>'; return; }
       list.innerHTML = '<div class="grid grid-cols-3 gap-2">' + files.map(function(f) {
         var url = photoPublicUrl(f.name);
         var safeName = String(f.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -171,7 +168,7 @@
       </div>
       <input id="passwordInput" type="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-4 mb-4 text-lg" onkeydown="if(event.key==='Enter')tryLogin()" />
       <button type="button" onclick="tryLogin()" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-xl text-lg">Unlock</button>
-      <p id="loginError" class="text-red-400 text-sm mt-3 text-center hidden">Wrong password for selected section</p>
+      <p id="loginError" class="text-red-400 text-sm mt-3 text-center hidden">Wrong password</p>
       <p class="text-xs text-slate-500 text-center mt-4">Futsal / Announce / Photos: <b class="text-slate-300">lexliga2026</b><br>Badminton: <b class="text-slate-300">badminton2026</b></p>
     </div>
   </div>
@@ -196,7 +193,7 @@
         <h3 class="font-bold mb-4 text-center">+ Add New Match</h3>
         <label class="text-xs text-slate-400 mb-1 block">Home Team</label>
         <select id="newHome" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-2 text-base"></select>
-        <input id="newHomeCustom" type="text" placeholder="Or type a new team name (e.g. girls team)" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
+        <input id="newHomeCustom" type="text" placeholder="Or type a new team name" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
         <label class="text-xs text-slate-400 mb-1 block">Away Team</label>
         <select id="newAway" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-2 text-base"></select>
         <input id="newAwayCustom" type="text" placeholder="Or type a new team name" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
@@ -233,12 +230,31 @@
       <div id="bmAddBox" class="bg-slate-800 rounded-2xl p-5 border border-slate-700 mt-8">
         <h3 class="font-bold mb-4 text-center">+ Add Badminton Match</h3>
         <label class="text-xs text-slate-400 mb-1 block">Player 1</label>
-        <input id="bmP1" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
+        <input id="bmP1" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" placeholder="Name or pair" />
         <label class="text-xs text-slate-400 mb-1 block">Player 2</label>
-        <input id="bmP2" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
+        <input id="bmP2" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" placeholder="Name or pair" />
         <label class="text-xs text-slate-400 mb-1 block">Category</label>
-        <select id="bmCategory" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-4 text-base">
-          <option>Men's Singles</option><option>Men's Doubles</option><option>Women's Singles</option><option>Women's Doubles</option><option>Mixed Doubles</option>
+        <select id="bmCategory" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base">
+          <option value="MS · R1">Men's Singles</option>
+          <option value="MD · R1">Men's Doubles</option>
+          <option value="WS · R1">Women's Singles</option>
+          <option value="WD · R1">Women's Doubles</option>
+          <option value="XD · R1">Mixed Doubles</option>
+        </select>
+        <label class="text-xs text-slate-400 mb-1 block">Round</label>
+        <select id="bmStage" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base">
+          <option value="round1">Round 1</option>
+          <option value="round2">Round 2</option>
+          <option value="round3">Round 3</option>
+          <option value="quarter_final">Quarter-final</option>
+          <option value="semi_final">Semi-final</option>
+          <option value="final">Final</option>
+        </select>
+        <label class="text-xs text-slate-400 mb-1 block">Points / format</label>
+        <select id="bmFormat" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-4 text-base">
+          <option value="auto">Auto (R1–QF = 15 pts · SF/Final = 21 Bo3)</option>
+          <option value="15">15 points · 1 set (golden point at 14–14)</option>
+          <option value="21">21 points · Best of 3 (win by 2, cap 30)</option>
         </select>
         <button type="button" id="bmAddBtn" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-xl text-lg">Add Match</button>
       </div>
@@ -254,7 +270,7 @@
     </header>
     <main class="max-w-lg mx-auto px-4 py-5 space-y-4">
       <textarea id="annMsg" rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3" placeholder="Announcement text"></textarea>
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="annActive" checked /> Active (show on site)</label>
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="annActive" checked /> Active</label>
       <button type="button" onclick="publishAnnounce()" class="w-full bg-green-500 text-slate-900 font-bold py-3 rounded-xl">Publish</button>
       <p id="annStatus" class="text-sm text-center text-slate-400"></p>
       <div id="announceHistory" class="space-y-2"></div>
@@ -280,10 +296,10 @@
   <script src="js/admin-photos.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/admin-list-patch.js?v=20260919-1"></script>
-  <script src="js/badminton-rules.js?v=20260919-1"></script>
+  <script src="js/badminton-rules.js?v=20260920-3"></script>
   <script src="js/admin-badminton.js?v=20260920-1"></script>
   <script src="js/admin-bm-detail.js?v=20260920-1"></script>
-  <script src="js/admin-bm-actions.js?v=20260920-1"></script>
+  <script src="js/admin-bm-actions.js?v=20260920-3"></script>
   <script src="js/admin-announce-fix.js"></script>
   <script>
     if (sessionStorage.getItem('lexAdmin') === '1') {
