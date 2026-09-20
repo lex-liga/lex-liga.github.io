@@ -226,12 +226,11 @@
     </header>
     <main class="max-w-lg mx-auto px-4 py-5 space-y-5 pb-20">
       <div class="flex items-center justify-between">
-        <h2 class="font-bold text-lg">Matches</h2>
-        <button type="button" id="refreshBmAdmin" class="text-sm text-green-400 font-medium">Refresh</button>
+        <h2 id="bmListTitle" class="font-bold text-lg">Matches</h2>
+        <button type="button" id="refreshBmAdmin" class="text-sm text-green-400 font-medium" onclick="if(window.loadBadmintonAdmin)loadBadmintonAdmin()">Refresh</button>
       </div>
-      <div id="bmAdminMatches" class="space-y-5"><p class="text-slate-400 text-sm">Loading...</p></div>
-      <div id="bmMatchDetail" class="hidden"></div>
-      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 mt-8">
+      <div id="adminBadmintonMatches" class="space-y-5"><p class="text-slate-400 text-sm">Loading...</p></div>
+      <div id="bmAddBox" class="bg-slate-800 rounded-2xl p-5 border border-slate-700 mt-8">
         <h3 class="font-bold mb-4 text-center">+ Add Badminton Match</h3>
         <label class="text-xs text-slate-400 mb-1 block">Player 1</label>
         <input id="bmP1" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-3 text-base" />
@@ -241,7 +240,7 @@
         <select id="bmCategory" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-4 text-base">
           <option>Men's Singles</option><option>Men's Doubles</option><option>Women's Singles</option><option>Women's Doubles</option><option>Mixed Doubles</option>
         </select>
-        <button type="button" id="addBmMatchBtn" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-xl text-lg">Add Match</button>
+        <button type="button" id="bmAddBtn" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-xl text-lg">Add Match</button>
       </div>
     </main>
   </div>
@@ -282,7 +281,9 @@
   <script src="js/admin.js"></script>
   <script src="js/admin-list-patch.js?v=20260919-1"></script>
   <script src="js/badminton-rules.js?v=20260919-1"></script>
-  <script src="js/admin-badminton.js?v=20260919-3"></script>
+  <script src="js/admin-badminton.js?v=20260920-1"></script>
+  <script src="js/admin-bm-detail.js?v=20260920-1"></script>
+  <script src="js/admin-bm-actions.js?v=20260920-1"></script>
   <script src="js/admin-announce-fix.js"></script>
   <script>
     if (sessionStorage.getItem('lexAdmin') === '1') {
