@@ -1,9 +1,4 @@
-// Lex Liga Badminton — official tournament scoring rules
-// Rulebook:
-// - Round 1–QF default: 15-point single set (Golden Point at 14–14)
-// - Semi/Final default: 21-point best of 3 (win by 2, cap 30)
-// Format can override via resolveFormatStage (15 or 21)
-
+// Lex Liga Badminton scoring rules
 (function (window) {
   'use strict';
 
@@ -41,8 +36,8 @@
     if (s === 'r1' || s === 'round_1') return 'round1';
     if (s === 'r2' || s === 'round_2') return 'round2';
     if (s === 'r3' || s === 'round_3') return 'round3';
-    if (s === 'qf' || s === 'quarter' || s === 'quarterfinal') return 'quarter_final';
-    if (s === 'sf' || s === 'semi' || s === 'semifinal') return 'semi_final';
+    if (s === 'qf' || s === 'quarter' || s === 'quarterfinal' || s === 'quarter_finals') return 'quarter_final';
+    if (s === 'sf' || s === 'semi' || s === 'semifinal' || s === 'semi_finals') return 'semi_final';
     if (s === 'f' || s === 'finale') return 'final';
     if (STAGE_INFO[s]) return s;
     return 'round1';
@@ -80,12 +75,10 @@
 
   function getGameScores(match, gameNumber) {
     var game = Math.max(1, Math.min(3, intValue(gameNumber, 1)));
-    return { p1: nonNegative(match['g' + game + '_p1']), p2: nonNegative(match['g' + game + '_p2']) };
-  }
-  function setGameScores(match, gameNumber, p1, p2) {
-    var game = Math.max(1, Math.min(3, intValue(gameNumber, 1)));
-    match['g' + game + '_p1'] = nonNegative(p1);
-    match['g' + game + '_p2'] = nonNegative(p2);
+    return {
+      p1: nonNegative(match['g' + game + '_p1']),
+      p2: nonNegative(match['g' + game + '_p2'])
+    };
   }
 
   function getGameWinner(match, gameNumber) {
@@ -104,67 +97,125 @@
     return null;
   }
 
-  function getCompletedGameWinners(match) {
-    var winners = [];
-    if (!isBestOfThree(match.stage)) {
-      var singleWinner = getGameWinner(match, 1);
-      if (singleWinner) winners.push(singleWinner);
-      return winners;
-    }
-    for (var game = 1; game <= 3; game++) {
-      var winner = getGameWinner(match, game);
-      if (winner) winners.push({ game: game, winner: winner });
-    }
-    return winners;
-  }
-
   function getMatchWinner(match) {
     if (match.winner_side === 'p1' || match.winner_side === 'p2') return match.winner_side;
     if (!isBestOfThree(match.stage)) return getGameWinner(match, 1);
     var p1 = 0, p2 = 0;
-    getCompletedGameWinners(match).forEach(function (w) {
-      var side = typeof w === 'string' ? w : w.winner;
-      if (side === 'p1') p1++;
-      if (side === 'p2') p2++;
-    });
+    for (var g = 1; g <= 3; g++) {
+      var w = getGameWinner(match, g);
+      if (w === 'p1') p1++;
+      if (w === 'p2') p2++;
+    }
     if (p1 >= 2) return 'p1';
     if (p2 >= 2) return 'p2';
     return null;
   }
 
   function getWinnerName(match) {
-    var w = getMatchWinner(match);
-    if (w === 'p1') return match.player1;
-    if (w === 'p2') return match.player2;
-    return null;
+    var w = match.winner_side || getMatchWinner(match);
+    if (w === 'p1') return match.player1 || 'Player 1';
+    if (w === 'p2') return match.player2 || 'Player 2';
+    return '';
   }
 
-  function getScoreline(match) {
-    if (!isBestOfThree(match.stage)) {
-      var s = getGameScores(match, 1);
-      return s.p1 + '–' + s.p2;
-    }
-    var parts = [];
-    for (var g = 1; g <= 3; g++) {
-      var sc = getGameScores(match, g);
-      if (sc.p1 || sc.p2 || g === 1) parts.push(sc.p1 + '–' + sc.p2);
-    }
-    return parts.join(' · ');
+  function getCurrentGame(match) {
+    var cg = intValue(match.current_game, 1);
+    return Math.max(1, Math.min(3, cg || 1));
   }
 
   function getDisplay(match) {
+    var m = match || {};
+    var stage = normalizeStage(m.stage);
+    var info = getStageInfo(stage);
+    var bot = isBestOfThree(stage);
+    var currentGame = getCurrentGame(m);
+    var cur = getGameScores(m, bot ? currentGame : 1);
+    var winner = m.winner_side || getMatchWinner(m);
+    var status = m.status || 'not_started';
+    var statusLabel = 'Upcoming';
+    if (status === 'walkover') statusLabel = 'W/O';
+    else if (status === 'finished' || winner) statusLabel = 'FT';
+    else if (status === 'live') statusLabel = 'LIVE';
+
     return {
-      stageLabel: getStageLabel(match.stage),
-      formatLabel: getFormatLabel(match.stage),
-      formatDescription: getFormatDescription(match.stage),
-      scoreline: getScoreline(match),
-      winner: getWinnerName(match),
-      isBestOfThree: isBestOfThree(match.stage),
-      isShortSet: isShortSet(match.stage)
+      stage: info.key,
+      stageLabel: info.label,
+      stageShortLabel: info.shortLabel,
+      format: info.format,
+      formatDescription: info.description,
+      bestOfThree: bot,
+      status: status,
+      statusLabel: statusLabel,
+      winnerSide: winner,
+      winnerName: getWinnerName(m),
+      currentGame: currentGame,
+      currentScoreP1: cur.p1,
+      currentScoreP2: cur.p2,
+      gamesP1: nonNegative(m.games_p1),
+      gamesP2: nonNegative(m.games_p2),
+      g1P1: nonNegative(m.g1_p1),
+      g1P2: nonNegative(m.g1_p2),
+      g2P1: nonNegative(m.g2_p1),
+      g2P2: nonNegative(m.g2_p2),
+      g3P1: nonNegative(m.g3_p1),
+      g3P2: nonNegative(m.g3_p2),
+      scoreText: cur.p1 + ' – ' + cur.p2,
+      gamesText: bot ? (nonNegative(m.games_p1) + ' – ' + nonNegative(m.games_p2)) : '',
+      finished: !!winner || status === 'finished' || status === 'walkover',
+      totalPoints: nonNegative(m.g1_p1) + nonNegative(m.g1_p2) + nonNegative(m.g2_p1) + nonNegative(m.g2_p2) + nonNegative(m.g3_p1) + nonNegative(m.g3_p2)
+    };
+  }
+
+  // Minimal evaluate/applyDelta for admin scoring if detail script needs them
+  function cloneMatch(match) {
+    return Object.assign({}, match);
+  }
+  function evaluate(match) {
+    var m = cloneMatch(match);
+    var w = getMatchWinner(m);
+    if (w && m.status !== 'walkover') {
+      m.winner_side = w;
+      if (m.status === 'live' || m.status === 'not_started') m.status = 'finished';
+    }
+    return m;
+  }
+  function applyDelta(match, side, delta) {
+    var m = cloneMatch(match);
+    var game = getCurrentGame(m);
+    var key = 'g' + game + '_' + (side === 'p2' ? 'p2' : 'p1');
+    m[key] = Math.max(0, nonNegative(m[key]) + intValue(delta, 0));
+    if (isBestOfThree(m.stage)) {
+      var p1g = 0, p2g = 0;
+      for (var g = 1; g <= 3; g++) {
+        var gw = getGameWinner(m, g);
+        if (gw === 'p1') p1g++;
+        if (gw === 'p2') p2g++;
+      }
+      m.games_p1 = p1g;
+      m.games_p2 = p2g;
+    }
+    return evaluate(m);
+  }
+  function toUpdate(match) {
+    return {
+      stage: match.stage,
+      status: match.status,
+      winner_side: match.winner_side || null,
+      current_game: getCurrentGame(match),
+      games_p1: nonNegative(match.games_p1),
+      games_p2: nonNegative(match.games_p2),
+      g1_p1: nonNegative(match.g1_p1),
+      g1_p2: nonNegative(match.g1_p2),
+      g2_p1: nonNegative(match.g2_p1),
+      g2_p2: nonNegative(match.g2_p2),
+      g3_p1: nonNegative(match.g3_p1),
+      g3_p2: nonNegative(match.g3_p2),
+      updated_at: new Date().toISOString()
     };
   }
 
   window.BadmintonRules = {
+    STAGES: STAGE_INFO,
     normalizeStage: normalizeStage,
     resolveFormatStage: resolveFormatStage,
     isBestOfThree: isBestOfThree,
@@ -174,12 +225,14 @@
     getFormatLabel: getFormatLabel,
     getFormatDescription: getFormatDescription,
     getGameScores: getGameScores,
-    setGameScores: setGameScores,
     getGameWinner: getGameWinner,
-    getCompletedGameWinners: getCompletedGameWinners,
     getMatchWinner: getMatchWinner,
     getWinnerName: getWinnerName,
-    getScoreline: getScoreline,
-    getDisplay: getDisplay
+    getCurrentGame: getCurrentGame,
+    getDisplay: getDisplay,
+    cloneMatch: cloneMatch,
+    evaluate: evaluate,
+    applyDelta: applyDelta,
+    toUpdate: toUpdate
   };
 })(window);
