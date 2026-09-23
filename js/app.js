@@ -5,7 +5,7 @@
   try { localStorage.setItem('theme', 'dark'); } catch (e) {}
 
   var s = document.createElement('script');
-  s.src = 'js/futsal-app.js?v=og2';
+  s.src = 'js/futsal-app.js?v=knockout1';
   s.async = false;
 
   s.onload = function () {
