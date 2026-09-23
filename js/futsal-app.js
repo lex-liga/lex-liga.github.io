@@ -90,6 +90,9 @@ function renderKnockoutCard(match, label) {
   var away = getTeamName(match.away_team_id);
   var hs = Number(match.home_score) || 0;
   var as_ = Number(match.away_score) || 0;
+  var ph = Number(match.pen_home) || 0;
+  var pa = Number(match.pen_away) || 0;
+  var pensOn = !!(match.pens_on || match.status === 'penalties' || ph || pa);
   var status = match.status || 'not_started';
   var isFinal = /final/i.test(String(match.group_name || '')) && !/semi/i.test(String(match.group_name || ''));
   var isTbd = /TBD/i.test(home) || /TBD/i.test(away);
@@ -99,9 +102,15 @@ function renderKnockoutCard(match, label) {
   if (status === 'finished' || status === 'walkover') {
     if (hs > as_) winner = home;
     else if (as_ > hs) winner = away;
+    else if (pensOn && ph > pa) winner = home;
+    else if (pensOn && pa > ph) winner = away;
+  }
+  var pensLine = '';
+  if (pensOn && (status === 'finished' || status === 'penalties')) {
+    pensLine = '<div class="ko-tba" style="color:#fbbf24">Pens ' + ph + '–' + pa + '</div>';
   }
   return (
-    '<div class="ko-card' + (isFinal ? ' ko-final' : '') + (status === 'live' ? ' ko-live' : '') + '">' +
+    '<div class="ko-card' + (isFinal ? ' ko-final' : '') + (status === 'live' || status === 'penalties' ? ' ko-live' : '') + '">' +
       '<div class="ko-card-top">' +
         '<span class="ko-label">' + escapeHtml(label || match.group_name || 'Knockout') + '</span>' +
         '<span class="ko-status" style="color:' + statusColor + '">' + statusLabel + '</span>' +
@@ -117,7 +126,8 @@ function renderKnockoutCard(match, label) {
           '<span class="ko-score">' + (status === 'not_started' && isTbd ? '–' : as_) + '</span>' +
         '</div>' +
       '</div>' +
-      (winner ? '<div class="ko-winner-line">Winner · ' + escapeHtml(winner) + '</div>' : '') +
+      pensLine +
+      (winner ? '<div class="ko-winner-line">Winner · ' + escapeHtml(winner) + (pensOn && hs === as_ ? ' (on pens)' : '') + '</div>' : '') +
       (isFinal && isTbd && status === 'not_started' ? '<div class="ko-tba">Finalists TBA after semis</div>' : '') +
     '</div>'
   );
@@ -142,7 +152,12 @@ function renderKnockoutSection(matches) {
   if (finals.length) {
     html += '<div class="ko-row ko-row-final">';
     finals.forEach(function (m) {
-      html += renderKnockoutCard(m, '🏆 Final');
+      var notes = String(m.notes || '');
+      var lab = '🏆 Final';
+      if (/women/i.test(notes)) lab = '🏆 Women Final';
+      else if (/men/i.test(notes)) lab = '🏆 Men Final';
+      else if (/women/i.test(getTeamName(m.home_team_id) + getTeamName(m.away_team_id))) lab = '🏆 Women Final';
+      html += renderKnockoutCard(m, lab);
     });
     html += '</div>';
   }
@@ -189,21 +204,16 @@ function renderStandings(rows) {
     if (!byGroup[g]) byGroup[g] = [];
     byGroup[g].push(r);
   });
-  const order = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E'].concat(
-    Object.keys(byGroup).filter(g => !['Group A','Group B','Group C','Group D','Group E'].includes(g)).sort()
+  const order = ['Group A', 'Group B'].concat(
+    Object.keys(byGroup).filter(g => !['Group A','Group B'].includes(g)).sort()
   );
-  const sortRows = list => {
-    const rows = list.slice();
-    rows.sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
-      if (gdB !== gdA) return gdB - gdA;
-      if (b.gf !== a.gf) return b.gf - a.gf;
-      if (a.ga !== b.ga) return a.ga - b.ga;
-      return a.name.localeCompare(b.name);
-    });
-    return rows;
-  };
+  const sortRows = list => list.slice().sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    const gdA = a.gf - a.ga, gdB = b.gf - b.ga;
+    if (gdB !== gdA) return gdB - gdA;
+    if (b.gf !== a.gf) return b.gf - a.gf;
+    return a.name.localeCompare(b.name);
+  });
   return order.filter(g => byGroup[g] && byGroup[g].length).map(g => {
     const list = sortRows(byGroup[g]);
     return '<div class="rounded-2xl border border-slate-700 overflow-hidden mb-4">' +
@@ -240,11 +250,9 @@ function renderTopScorers() {
     rows.map((r, i) =>
       '<div class="flex justify-between px-4 py-3 text-sm">' +
         '<span><span class="text-slate-500 mr-2">' + (i + 1) + '</span>' +
-        escapeHtml(r.name) +
-        ' <span class="text-slate-500">(' + escapeHtml(r.team) + ')</span></span>' +
+        escapeHtml(r.name) + ' <span class="text-slate-500">(' + escapeHtml(r.team) + ')</span></span>' +
         '<span class="font-bold text-green-400">' + r.n + '</span></div>'
-    ).join('') +
-    '</div>';
+    ).join('') + '</div>';
 }
 
 async function loadFutsal() {
