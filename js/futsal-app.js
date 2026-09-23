@@ -182,7 +182,7 @@ function computeStandings() {
     const home = table[m.home_team_id];
     const away = table[m.away_team_id];
     if (!home || !away) return;
-    if (home.group !== away.group || (home.group !== 'Group A' && home.group !== 'Group B')) return;
+    if (home.group !== away.group || !['Group A','Group B','Group C'].includes(home.group)) return;
     const hs = Number(m.home_score) || 0;
     const as = Number(m.away_score) || 0;
     home.played++; away.played++;
@@ -204,8 +204,8 @@ function renderStandings(rows) {
     if (!byGroup[g]) byGroup[g] = [];
     byGroup[g].push(r);
   });
-  const order = ['Group A', 'Group B'].concat(
-    Object.keys(byGroup).filter(g => !['Group A','Group B'].includes(g)).sort()
+  const order = ['Group A', 'Group B', 'Group C'].concat(
+    Object.keys(byGroup).filter(g => !['Group A','Group B','Group C'].includes(g)).sort()
   );
   const sortRows = list => list.slice().sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
