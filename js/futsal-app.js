@@ -1,4 +1,4 @@
-// Lex Liga Futsal public – extra time + pens + sudden death + standings + scorers
+// Lex Liga Futsal public – knockout stage + standings + scorers
 const sb = window.supabaseClient || window.supabase || supabase;
 let allTeams = [], allMatches = [], allGoals = [];
 
@@ -85,6 +85,71 @@ function renderMatchCard(match) {
   );
 }
 
+function renderKnockoutCard(match, label) {
+  var home = getTeamName(match.home_team_id);
+  var away = getTeamName(match.away_team_id);
+  var hs = Number(match.home_score) || 0;
+  var as_ = Number(match.away_score) || 0;
+  var status = match.status || 'not_started';
+  var isFinal = /final/i.test(String(match.group_name || '')) && !/semi/i.test(String(match.group_name || ''));
+  var isTbd = /TBD/i.test(home) || /TBD/i.test(away);
+  var statusLabel = status === 'live' ? 'LIVE' : status === 'half_time' ? 'HT' : status === 'finished' ? 'FT' : status === 'penalties' ? 'PENS' : 'UPCOMING';
+  var statusColor = status === 'live' ? '#22c55e' : status === 'finished' ? '#94a3b8' : isFinal ? '#fbbf24' : '#60a5fa';
+  var winner = '';
+  if (status === 'finished' || status === 'walkover') {
+    if (hs > as_) winner = home;
+    else if (as_ > hs) winner = away;
+  }
+  return (
+    '<div class="ko-card' + (isFinal ? ' ko-final' : '') + (status === 'live' ? ' ko-live' : '') + '">' +
+      '<div class="ko-card-top">' +
+        '<span class="ko-label">' + escapeHtml(label || match.group_name || 'Knockout') + '</span>' +
+        '<span class="ko-status" style="color:' + statusColor + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="ko-teams">' +
+        '<div class="ko-team' + (winner === home ? ' ko-winner' : '') + '">' +
+          '<span class="ko-team-name">' + escapeHtml(isTbd && status === 'not_started' ? 'TBD' : home) + '</span>' +
+          '<span class="ko-score">' + (status === 'not_started' && isTbd ? '–' : hs) + '</span>' +
+        '</div>' +
+        '<div class="ko-vs">VS</div>' +
+        '<div class="ko-team' + (winner === away ? ' ko-winner' : '') + '">' +
+          '<span class="ko-team-name">' + escapeHtml(isTbd && status === 'not_started' ? 'TBD' : away) + '</span>' +
+          '<span class="ko-score">' + (status === 'not_started' && isTbd ? '–' : as_) + '</span>' +
+        '</div>' +
+      '</div>' +
+      (winner ? '<div class="ko-winner-line">Winner · ' + escapeHtml(winner) + '</div>' : '') +
+      (isFinal && isTbd && status === 'not_started' ? '<div class="ko-tba">Finalists TBA after semis</div>' : '') +
+    '</div>'
+  );
+}
+
+function renderKnockoutSection(matches) {
+  var semis = matches.filter(function (m) {
+    return /semi/i.test(String(m.group_name || ''));
+  });
+  var finals = matches.filter(function (m) {
+    var g = String(m.group_name || '').toLowerCase();
+    return g.indexOf('final') >= 0 && g.indexOf('semi') < 0;
+  });
+  var html = '';
+  if (semis.length) {
+    html += '<div class="ko-row">';
+    semis.forEach(function (m, i) {
+      html += renderKnockoutCard(m, 'Semi-final ' + (i + 1));
+    });
+    html += '</div>';
+  }
+  if (finals.length) {
+    html += '<div class="ko-row ko-row-final">';
+    finals.forEach(function (m) {
+      html += renderKnockoutCard(m, '🏆 Final');
+    });
+    html += '</div>';
+  }
+  if (!html) html = '<p class="empty-state">Knockout matches will appear here</p>';
+  return html;
+}
+
 function teamGroupLabel(t) {
   const group = String(t.group_name || '').trim();
   if (group === 'Group A' || group === 'Group B' || group === 'Group C' || group === 'Group D' || group === 'Group E') return group;
@@ -94,6 +159,7 @@ function teamGroupLabel(t) {
 function computeStandings() {
   const table = {};
   allTeams.forEach(t => {
+    if (/TBD/i.test(String(t.name || ''))) return;
     table[t.id] = { id: t.id, name: t.name, group: teamGroupLabel(t), played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0 };
   });
   allMatches.forEach(m => {
@@ -113,23 +179,6 @@ function computeStandings() {
     else { home.drawn++; away.drawn++; home.pts += 1; away.pts += 1; }
   });
   return Object.values(table);
-}
-
-function headToHeadWinner(teamA, teamB) {
-  if (!teamA || !teamB || !teamA.group || teamA.group !== teamB.group) return null;
-  const matches = allMatches.filter(m => {
-    if (m.status !== 'finished' && m.status !== 'walkover') return false;
-    const aIsHome = m.home_team_id === teamA.id && m.away_team_id === teamB.id;
-    const aIsAway = m.home_team_id === teamB.id && m.away_team_id === teamA.id;
-    return aIsHome || aIsAway;
-  });
-  if (matches.length !== 1) return null;
-  const m = matches[0];
-  const hs = Number(m.home_score) || 0;
-  const as = Number(m.away_score) || 0;
-  if (hs === as) return null;
-  if (m.home_team_id === teamA.id) return hs > as ? teamA.id : teamB.id;
-  return as > hs ? teamA.id : teamB.id;
 }
 
 function renderStandings(rows) {
@@ -179,14 +228,10 @@ function renderStandings(rows) {
 function renderTopScorers() {
   const counts = {};
   allGoals.forEach(g => {
-    // Own goals never count for Golden Boot
     const pname = String(g.player_name || '');
     if (/\bOG\b|own\s*goal/i.test(pname)) return;
-
     const key = g.player_name + '|' + g.team_id;
-    if (!counts[key]) {
-      counts[key] = { name: g.player_name, team: getTeamName(g.team_id), n: 0 };
-    }
+    if (!counts[key]) counts[key] = { name: g.player_name, team: getTeamName(g.team_id), n: 0 };
     counts[key].n++;
   });
   const rows = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 10);
@@ -235,6 +280,7 @@ async function loadFutsal() {
     }
 
     const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    set('knockoutMatches', renderKnockoutSection(allMatches));
     set('liveMatches', live.length ? live.map(renderMatchCard).join('') : '<p class="empty-state">No live matches</p>');
     set('recentResults', finished.length ? finished.slice().reverse().slice(0, 12).map(renderMatchCard).join('') : '<p class="empty-state">No results yet</p>');
     set('quickStandings', renderStandings(computeStandings()));
@@ -242,11 +288,11 @@ async function loadFutsal() {
     set('snapshotMatches', String(allMatches.length));
     set('snapshotLive', String(live.length));
     set('snapshotGoals', String(allGoals.length));
-    set('snapshotTeams', String(allTeams.length));
+    set('snapshotTeams', String(allTeams.filter(t => !/TBD/i.test(t.name || '')).length));
     if (updated) updated.textContent = 'Updated ' + new Date().toLocaleTimeString();
   } catch (err) {
     console.error(err);
-    ['liveMatches', 'recentResults', 'quickStandings', 'topScorers'].forEach(id => {
+    ['knockoutMatches', 'liveMatches', 'recentResults', 'quickStandings', 'topScorers'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<p class="text-red-400 text-sm p-3">' + (err.message || 'Error') + '</p>';
     });
