@@ -6,6 +6,9 @@
   <title>Lex Liga — See You Next Year</title>
   <meta name="theme-color" content="#0b1120" />
   <meta name="description" content="Lex Liga 2026 has concluded. We'll be back next year." />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -184,8 +187,8 @@
         <div class="music-row">
           <button type="button" class="play" id="playBtn" aria-pressed="false">▶ Play song</button>
         </div>
-        <audio id="bgMusic" loop preload="metadata" playsinline
-          src="assets/goodbye-song.mp3"></audio>
+        <audio id="bgMusic" loop preload="auto" playsinline
+          src="assets/goodbye-song.mp3?v=3"></audio>
       </div>
 
       <p class="logo-word">LEX <span>LIGA</span></p>
@@ -198,6 +201,18 @@
 
   <script>
     (function () {
+      // Clear old PWA cache so goodbye page isn't stuck on old HTML/audio
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (r) { r.unregister(); });
+        });
+      }
+      if (window.caches && caches.keys) {
+        caches.keys().then(function (keys) {
+          keys.forEach(function (k) { caches.delete(k); });
+        });
+      }
+
       var el = document.getElementById('greeting');
       var h = new Date().getHours();
       var text;
@@ -219,7 +234,8 @@
             btn.textContent = '❚❚ Pause';
             btn.classList.add('playing');
             btn.setAttribute('aria-pressed', 'true');
-          }).catch(function () {
+          }).catch(function (err) {
+            console.error(err);
             btn.textContent = '▶ Tap again to play';
           });
         } else {
