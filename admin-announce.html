@@ -1,90 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Announcements Admin – Lex Liga</title>
-  <meta name="robots" content="noindex" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content="0;url=./" />
+  <title>Redirecting…</title>
+  <script>location.replace('./');</script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
-  <div id="login" class="min-h-screen flex items-center justify-center px-4">
-    <div class="bg-slate-800 rounded-2xl p-8 w-full max-w-sm border border-slate-700">
-      <h1 class="text-xl font-bold text-center mb-1">Announcement Admin</h1>
-      <p class="text-sm text-slate-400 text-center mb-5">Scrolling bar on every public page</p>
-      <input id="pwd" type="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 mb-4"
-        onkeydown="if(event.key==='Enter')login()" />
-      <button type="button" onclick="login()" class="w-full bg-green-500 text-slate-900 font-bold py-3 rounded-xl">Unlock</button>
-      <p id="err" class="text-red-400 text-sm text-center mt-3 hidden">Wrong password</p>
-      <p class="text-xs text-slate-500 text-center mt-4">Password: <b class="text-slate-300">lexliga2026</b></p>
-    </div>
-  </div>
-
-  <div id="panel" class="hidden max-w-lg mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-xl font-bold">Scrolling announcement</h1>
-      <a href="index.html" class="text-green-400 text-sm">Live site</a>
-    </div>
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 space-y-4">
-      <label class="text-xs text-slate-400 block">Message (loops left → right on all pages)</label>
-      <textarea id="msg" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-base" placeholder="e.g. Final starts at 4:30 PM on Court 1"></textarea>
-      <label class="flex items-center gap-2 text-sm">
-        <input id="active" type="checkbox" class="w-5 h-5" checked />
-        Show bar on website
-      </label>
-      <button type="button" onclick="save()" class="w-full bg-green-500 text-slate-900 font-bold py-3 rounded-xl">Save announcement</button>
-      <p id="status" class="text-sm text-center text-slate-400"></p>
-    </div>
-    <p class="text-xs text-slate-500 mt-4">Tip: leave empty and uncheck “Show” to hide the bar.</p>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="js/supabase-config.js"></script>
-  <script>
-    var sb = window.supabaseClient;
-    function login() {
-      if (document.getElementById('pwd').value.trim() === 'lexliga2026') {
-        sessionStorage.setItem('lexAnnounceAdmin', '1');
-        document.getElementById('login').classList.add('hidden');
-        document.getElementById('panel').classList.remove('hidden');
-        load();
-      } else {
-        document.getElementById('err').classList.remove('hidden');
-      }
-    }
-    async function load() {
-      if (!sb) return;
-      var res = await sb.from('announcements').select('*').eq('id', 1).maybeSingle();
-      if (res.data) {
-        document.getElementById('msg').value = res.data.message || '';
-        document.getElementById('active').checked = !!res.data.active;
-      }
-    }
-    async function save() {
-      var message = document.getElementById('msg').value.trim();
-      var active = document.getElementById('active').checked;
-      var st = document.getElementById('status');
-      st.textContent = 'Saving…';
-      var res = await sb.from('announcements').upsert({
-        id: 1,
-        message: message,
-        active: active,
-        updated_at: new Date().toISOString()
-      });
-      if (res.error) {
-        st.textContent = 'Error: ' + res.error.message + ' — run the SQL in PLAN first.';
-        st.className = 'text-sm text-center text-red-400';
-      } else {
-        st.textContent = 'Saved. Bar updates on the live site within ~30s.';
-        st.className = 'text-sm text-center text-green-400';
-      }
-    }
-    if (sessionStorage.getItem('lexAnnounceAdmin') === '1') {
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('panel').classList.remove('hidden');
-      load();
-    }
-  </script>
+<body>
+  <p style="font-family:system-ui;text-align:center;margin-top:2rem">
+    <a href="./">Lex Liga 2026 has concluded — continue here</a>
+  </p>
 </body>
 </html>
