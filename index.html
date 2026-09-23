@@ -68,10 +68,17 @@
       color: var(--gold);
       margin-bottom: 0.85rem;
     }
+    .greeting-lead {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.02em;
+    }
     .greeting {
-      font-size: clamp(1.75rem, 6vw, 2.35rem);
+      font-size: clamp(1.35rem, 5vw, 1.85rem);
       font-weight: 900;
-      line-height: 1.15;
+      line-height: 1.3;
       margin-bottom: 0.5rem;
       background: linear-gradient(135deg, #fff 0%, #fbbf24 50%, #34d399 100%);
       -webkit-background-clip: text;
@@ -207,7 +214,8 @@
   <div class="wrap">
     <div class="card">
       <p class="kicker"><span class="pulse"></span> Lex Liga · Season closed</p>
-      <h1 class="greeting" id="greeting">Good evening</h1>
+      <p class="greeting-lead">In case I don’t see ya…</p>
+      <h1 class="greeting">Good afternoon, good evening,<br />and good night.</h1>
       <div class="year-badge">2026 · Until next year</div>
       <p class="sub">
         The pitches are quiet for now.<br />
@@ -252,15 +260,6 @@
           keys.forEach(function (k) { caches.delete(k); });
         });
       }
-
-      var el = document.getElementById('greeting');
-      var h = new Date().getHours();
-      var text;
-      if (h >= 5 && h < 12) text = 'Good morning';
-      else if (h >= 12 && h < 17) text = 'Good afternoon';
-      else if (h >= 17 && h < 21) text = 'Good evening';
-      else text = 'Good night';
-      el.textContent = text;
 
       var audio = document.getElementById('bgMusic');
       var btn = document.getElementById('playBtn');
